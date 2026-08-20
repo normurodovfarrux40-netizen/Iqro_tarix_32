@@ -77,10 +77,10 @@
   .progress-fill{ height:100%; background: var(--gold); border-radius:99px; transition: width .3s ease; }
   .progress-num{ font-family:'IBM Plex Mono', monospace; font-size:12.5px; color: rgba(247,244,236,0.6); }
 
-  .q-text{ font-family:'Space Grotesk','Inter',sans-serif; font-size:20px; font-weight:600; line-height:1.4; margin-bottom:22px; white-space:pre-line; }
+  .q-text{ font-family:'Space Grotesk','Inter',sans-serif; font-size:18px; font-weight:600; line-height:1.4; margin-bottom:22px; white-space:pre-line; }
   .opt{
-    display:flex; align-items:center; gap:12px; padding:15px 16px; border-radius:12px;
-    border:1px solid var(--line); background: var(--ink-soft); margin-bottom:10px; font-size:15px; cursor:pointer;
+    display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:12px;
+    border:1px solid var(--line); background: var(--ink-soft); margin-bottom:10px; font-size:14.5px; cursor:pointer;
   }
   .opt-letter{
     font-family:'IBM Plex Mono', monospace; font-size:12px; width:24px; height:24px; border-radius:50%;
@@ -177,14 +177,23 @@
     <div id="quizCategoriesList"></div>
   </div>
 
+  <!-- SUB-TESTLAR RO'YXATI (MASALAN ATTESTATSIYA ICHIDAGILAR) -->
+  <div class="screen" id="screen-subsets">
+    <div class="eyebrow">To'plamlar</div>
+    <h1 id="subCategoryTitle">Attestatsiya testlari</h1>
+    <p class="sub">Mavjud test variantini tanlang:</p>
+    <div id="subsetsList"></div>
+    <button class="btn-secondary" id="backToMainCatBtn" style="margin-top:15px;">Orqaga</button>
+  </div>
+
   <!-- REJIM VA VAQT TANLASH -->
   <div class="screen" id="screen-mode-select">
     <div class="eyebrow">Rejim</div>
-    <h1 id="selectedCatTitle">Bo'lim</h1>
+    <h1 id="selectedSubTitle">Test</h1>
     <p class="sub">Test ishlash tartibini tanlang:</p>
-    <button class="btn-primary" id="modeTimedBtn">⏱ Vaqtli rejim (Belgilangan vaqt chegarasi bilan)</button>
+    <button class="btn-primary" id="modeTimedBtn">⏱ Vaqtli rejim (70 daqiqa)</button>
     <button class="btn-secondary" id="modeUntimedBtn" style="margin-top:10px;">⏳ Vaqtsiz rejim (Cheksiz vaqt)</button>
-    <button class="btn-secondary" id="backToCatBtn" style="margin-top:10px;">Orqaga</button>
+    <button class="btn-secondary" id="backToSubBtn" style="margin-top:10px;">Orqaga</button>
   </div>
 
   <!-- ATAMALAR -->
@@ -270,6 +279,7 @@
         <option value="Majburiy">Majburiy</option>
       </select>
       
+      <input type="text" id="tSubName" placeholder="Test nomi (Masalan: Attestatsiya testi-1)" style="margin-top:10px;">
       <p class="sub" style="font-size:13px; margin-bottom:8px;">(.docx formatdagi Word faylni tanlang)</p>
       <input type="file" id="wordFileInput" accept=".docx" style="padding:10px; background:var(--ink-soft); border-radius:12px; border:1px solid var(--line); margin-bottom:14px; width:100%; color:var(--paper);">
       <button class="btn-primary" id="uploadWordBtn">Word faylni yuklash va tahlil qilish</button>
@@ -316,14 +326,14 @@ const HISTORY_VOCAB = [
 ];
 
 const QUIZ_CATEGORIES = [
-  { cat: 'Attestatsiya', icon: '🏆', title: 'Attestatsiya testi-1' },
+  { cat: 'Attestatsiya', icon: '🏆', title: 'Attestatsiya' },
   { cat: 'MS', icon: '🥇', title: 'MS Test' },
   { cat: 'Olimpiada', icon: '🏅', title: 'Olimpiada' },
   { cat: 'DTM', icon: '📚', title: 'DTM Testlari' },
   { cat: 'Majburiy', icon: '⚡', title: 'Majburiy testlar' }
 ];
 
-const ATTESTATSIYA_QUESTIONS = [
+const ATTESTATSIYA_QUESTIONS_1 = [
   { q: "1. Quyidagi qadimgi davrdagi davlatlar kimlarning davrida yuksalganini toping?\n1) Ahmoniylar imperiyasi   2) Xan imperiyasi   3) Midiya   4) Mauriya\na) Kiaksar   b) Sargon I   c) Ashoka   d) U-Di   e) Kir II", options: ["1-b, 2-a, 3-c, 4-c", "1-e, 2-b, 3-d, 4-c", "1-e, 2-d, 3-a, 4-c", "1-a, 2-b, 3-d, 4-e"], correct: 2 },
   { q: "2. G.Rozenbax Turkiston general-gubernatorligini boshqargan yillar oralig'ida Chor Rossiyasiga qarshi qo'zg'olonlar bo'lgan hududlar qaysi javobda to'g'ri ko'rsatilgan?\n1) Kalif  2) Xiva  3) Ko'lob  4) Baljuvon  5) Andijon  6) Urgut  7) Jizzax  8) Mingtepa  9) O'ratepa", options: ["2, 3, 4, 6", "1, 2, 3, 4", "2, 5, 6, 7", "1, 3, 4, 5"], correct: 3 },
   { q: "3. O'rta asrlarda Yevropada Birjalar tashkil topgan shaharlar va ularning yillari bilan moslashtirib belgilang.\n1) Lion  2) Bryugge  3) Antverpen  4) London\na) 1600  b) 1460  c) 1462  d) 1409", options: ["1-a, 2-d, 3-b, 4-c", "1-a, 2-c, 3-b, 4-d", "1-c, 2-d, 3-b, 4-a", "1-d, 2-c, 3-b, 4-a"], correct: 2 },
@@ -364,6 +374,7 @@ const ATTESTATSIYA_QUESTIONS = [
 let currentUser = "";
 let currentAvatar = "";
 let currentCategory = "";
+let currentSubTest = "";
 let isTimedMode = true;
 let currentQuestions = [];
 let currentIndex = 0;
@@ -375,6 +386,7 @@ let timeLeft = 0;
 const screens = {
   home: document.getElementById('screen-home'),
   quizlist: document.getElementById('screen-quizlist'),
+  subsets: document.getElementById('screen-subsets'),
   vocab: document.getElementById('screen-vocab'),
   quiz: document.getElementById('screen-quiz'),
   result: document.getElementById('screen-result'),
@@ -514,20 +526,83 @@ function renderQuizSets(){
     card.innerHTML = `<div class="quizset-icon">${c.icon}</div><div class="quizset-body"><div class="quizset-title">${c.title}</div><div class="quizset-desc" id="desc-${c.cat}">Tekshirilmoqda...</div></div>`;
     list.appendChild(card);
 
-    let count = (c.cat === 'Attestatsiya') ? ATTESTATSIYA_QUESTIONS.length : 0;
-    if(count > 0){
-      applyCategoryState(card, c, count);
+    if(c.cat === 'Attestatsiya'){
+      let count = ATTESTATSIYA_QUESTIONS_1.length;
+      let timeMin = count * 2;
+      const desc = card.querySelector('.quizset-desc');
+      if(desc){
+        desc.textContent = `1 ta to'plam mavjud (${count} ta savol)`;
+        card.classList.remove('disabled');
+        card.onclick = () => {
+          currentCategory = c.cat;
+          renderSubTests(c.cat);
+        };
+      }
     } else if(db){
       db.ref('tests/' + c.cat).once('value', snap => {
-        let dbCount = 0;
-        if(snap.exists()) snap.forEach(() => { dbCount++; });
-        applyCategoryState(card, c, dbCount);
+        let count = 0;
+        if(snap.exists()) snap.forEach(() => { count++; });
+        applyCategoryState(card, c, count);
       }, () => { applyCategoryState(card, c, 0); });
     } else {
       applyCategoryState(card, c, 0);
     }
   });
 }
+
+function renderSubTests(catName){
+  showScreen('subsets');
+  document.getElementById('subCategoryTitle').textContent = catName + " testlari";
+  const list = document.getElementById('subsetsList');
+  list.innerHTML = '';
+
+  let subTests = [];
+  if(catName === 'Attestatsiya'){
+    subTests.push({ name: 'Attestatsiya testi-1', count: ATTESTATSIYA_QUESTIONS_1.length });
+  }
+
+  if(db){
+    db.ref('tests/' + catName).once('value', snap => {
+      if(snap.exists()){
+        snap.forEach(child => {
+          // Agar o'qituvchi alohida sub-test yuklagan bo'lsa
+          let subName = child.key;
+          let subData = child.val();
+          if(Array.isArray(subData)){
+            subTests.push({ name: subName, count: subData.length, data: subData });
+          }
+        });
+      }
+      buildSubTestsUI(subTests, catName);
+    });
+  } else {
+    buildSubTestsUI(subTests, catName);
+  }
+}
+
+function buildSubTestsUI(subTests, catName){
+  const list = document.getElementById('subsetsList');
+  list.innerHTML = '';
+  if(subTests.length === 0){
+    list.innerHTML = `<div style="text-align:center; color:rgba(247,244,236,0.6); padding:20px;">Hozircha bu bo'limda testlar yo'q.</div>`;
+    return;
+  }
+
+  subTests.forEach(st => {
+    const card = document.createElement('div');
+    card.className = 'quizset-card';
+    card.innerHTML = `<div class="quizset-icon">📄</div><div class="quizset-body"><div class="quizset-title">${st.name}</div><div class="quizset-desc">${st.count} ta savol • ${st.count * 2} daqiqa</div></div>`;
+    card.onclick = () => {
+      currentSubTest = st.name;
+      document.getElementById('selectedSubTitle').textContent = st.name;
+      showScreen('modeSelect');
+    };
+    list.appendChild(card);
+  });
+}
+
+document.getElementById('backToMainCatBtn').addEventListener('click', () => showScreen('quizlist'));
+document.getElementById('backToSubBtn').addEventListener('click', () => renderSubTests(currentCategory));
 
 function applyCategoryState(card, c, count){
   const desc = card.querySelector('.quizset-desc');
@@ -538,7 +613,8 @@ function applyCategoryState(card, c, count){
     card.classList.remove('disabled');
     card.onclick = () => {
       currentCategory = c.cat;
-      document.getElementById('selectedCatTitle').textContent = c.title;
+      currentSubTest = c.cat;
+      document.getElementById('selectedSubTitle').textContent = c.title;
       showScreen('modeSelect');
     };
   } else {
@@ -561,8 +637,8 @@ document.getElementById('modeUntimedBtn').addEventListener('click', () => {
 });
 
 function loadQuestionsAndStart(){
-  if(currentCategory === 'Attestatsiya'){
-    startQuizWithList(ATTESTATSIYA_QUESTIONS);
+  if(currentCategory === 'Attestatsiya' && currentSubTest === 'Attestatsiya testi-1'){
+    startQuizWithList(ATTESTATSIYA_QUESTIONS_1);
     return;
   }
   if(!db){
@@ -570,14 +646,22 @@ function loadQuestionsAndStart(){
     showScreen('quizlist');
     return;
   }
-  db.ref('tests/' + currentCategory).once('value', snapshot => {
+  let refPath = 'tests/' + currentCategory;
+  if(currentSubTest && currentSubTest !== currentCategory){
+    refPath += '/' + currentSubTest;
+  }
+  db.ref(refPath).once('value', snapshot => {
     let qList = [];
     if(snapshot.exists()){
-      snapshot.forEach(child => { qList.push(child.val()); });
+      if(Array.isArray(snapshot.val())){
+        qList = snapshot.val();
+      } else {
+        snapshot.forEach(child => { qList.push(child.val()); });
+      }
     }
     if(qList.length === 0){
-      showToast("Bu bo'lim uchun hozircha savollar mavjud emas!");
-      showScreen('quizlist');
+      showToast("Bu test uchun savollar topilmadi!");
+      showScreen('subsets');
       return;
     }
     startQuizWithList(qList);
@@ -654,7 +738,7 @@ document.getElementById('nextQBtn').addEventListener('click', () => {
 
 document.getElementById('quizBackBtn').addEventListener('click', () => {
   clearInterval(timerInterval);
-  showScreen('quizlist');
+  showScreen('subsets');
 });
 
 function finishQuiz(){
@@ -694,7 +778,7 @@ function finishQuiz(){
   document.getElementById('resultDetails').innerHTML = detailsHTML;
 
   const logs = JSON.parse(localStorage.getItem('history_logs') || '[]');
-  logs.push({ percent, category: currentCategory, ts: Date.now() });
+  logs.push({ percent, category: currentCategory + ' (' + currentSubTest + ')', ts: Date.now() });
   localStorage.setItem('history_logs', JSON.stringify(logs));
 
   setXP(getXP() + score * 5 + (percent === 100 ? 50 : 0));
@@ -815,7 +899,13 @@ document.getElementById('teacherLogoutBtn').addEventListener('click', () => show
 
 document.getElementById('uploadWordBtn').addEventListener('click', () => {
   let cat = document.getElementById('tCategory').value;
+  let subName = document.getElementById('tSubName').value.trim();
   let fileInput = document.getElementById('wordFileInput');
+  
+  if(!subName){
+    showToast("Iltimos, test nomini kiriting (Masalan: Attestatsiya testi-2)!");
+    return;
+  }
   if(fileInput.files.length === 0){
     showToast("Iltimos, Word faylini tanlang!");
     return;
@@ -830,11 +920,7 @@ document.getElementById('uploadWordBtn').addEventListener('click', () => {
         let text = result.value;
         let blocks = text.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
         
-        if(db){
-          db.ref('tests/' + cat).remove();
-        }
-
-        let importedCount = 0;
+        let questionsArr = [];
         blocks.forEach(block => {
           let lines = block.split('\n').map(l => l.trim()).filter(Boolean);
           if(lines.length >= 5){
@@ -852,20 +938,25 @@ document.getElementById('uploadWordBtn').addEventListener('click', () => {
               options.push(optLine);
             }
 
-            if(db && qText && options.length === 4){
-              db.ref('tests/' + cat).push({
+            if(qText && options.length === 4){
+              questionsArr.push({
                 q: qText,
                 options: options,
                 correct: correctIndex
               });
-              importedCount++;
             }
           }
         });
 
-        showToast(`Fayl tahlil qilindi: ${importedCount} ta test yuklandi!`);
-        fileInput.value = '';
-        renderQuizSets();
+        if(db && questionsArr.length > 0){
+          db.ref('tests/' + cat + '/' + subName).set(questionsArr);
+          showToast(`Fayl tahlil qilindi: ${questionsArr.length} ta test yuklandi!`);
+          fileInput.value = '';
+          document.getElementById('tSubName').value = '';
+          renderQuizSets();
+        } else {
+          showToast("Fayldan testlar topilmadi yoki shablon xato!");
+        }
       })
       .catch(err => {
         console.error(err);
