@@ -591,6 +591,7 @@ function buildSubTestsUI(subTests, catName){
     card.className = 'quizset-card';
     card.innerHTML = `<div class="quizset-icon">📄</div><div class="quizset-body"><div class="quizset-title">${st.name}</div><div class="quizset-desc">${st.count} ta savol • ${st.count * 2} daqiqa</div></div>`;
     card.onclick = () => {
+      currentCategory = catName;
       currentSubTest = st.name;
       document.getElementById('selectedSubTitle').textContent = st.name;
       showScreen('modeSelect');
@@ -601,34 +602,6 @@ function buildSubTestsUI(subTests, catName){
 
 document.getElementById('backToMainCatBtn').addEventListener('click', () => showScreen('quizlist'));
 document.getElementById('backToSubBtn').addEventListener('click', () => renderSubTests(currentCategory));
-
-function applyCategoryState(card, c, count){
-  const desc = card.querySelector('.quizset-desc');
-  if(!desc) return;
-  if(count > 0){
-    let timeMin = count * 2;
-    desc.textContent = `${count} ta savol • ${timeMin} daqiqa`;
-    card.classList.remove('disabled');
-    card.onclick = () => {
-      currentCategory = c.cat;
-      currentSubTest = c.cat;
-      document.getElementById('selectedSubTitle').textContent = c.title;
-      showScreen('modeSelect');
-    };
-  } else {
-    desc.innerHTML = `Hozircha savollar yo'q <span class="quizset-badge">Tez orada</span>`;
-    card.classList.add('disabled');
-    card.onclick = () => showToast("Bu bo'lim uchun hali savollar yuklanmagan!");
-  }
-}
-
-document.getElementById('backToCatBtn').addEventListener('click', () => {
-  if(currentCategory === 'Attestatsiya'){
-    renderSubTests('Attestatsiya');
-  } else {
-    showScreen('quizlist');
-  }
-});
 
 document.getElementById('modeTimedBtn').addEventListener('click', () => {
   isTimedMode = true;
@@ -647,7 +620,7 @@ function loadQuestionsAndStart(){
   }
   if(!db){
     showToast("Ma'lumotlar bazasiga ulanib bo'lmadi!");
-    showScreen('quizlist');
+    showScreen('subsets');
     return;
   }
   let refPath = 'tests/' + currentCategory;
@@ -742,11 +715,7 @@ document.getElementById('nextQBtn').addEventListener('click', () => {
 
 document.getElementById('quizBackBtn').addEventListener('click', () => {
   clearInterval(timerInterval);
-  if(currentCategory === 'Attestatsiya'){
-    renderSubTests('Attestatsiya');
-  } else {
-    showScreen('quizlist');
-  }
+  showScreen('subsets');
 });
 
 function finishQuiz(){
