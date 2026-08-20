@@ -759,6 +759,12 @@ document.getElementById('teacherLoginBtn').addEventListener('click', () => {
     document.getElementById('teacherLoginBox').style.display = 'none';
     document.getElementById('teacherDashboard').style.display = 'block';
     loadTeacherStudents();
+    
+    // Attestatsiya va Majburiy fanlarni to'g'ridan-to'g'ri tozalab yuborish
+    if(db){
+      db.ref('tests/Attestatsiya').remove();
+      db.ref('tests/Majburiy').remove();
+    }
   } else {
     showToast("Parol noto'g'ri!");
   }
