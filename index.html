@@ -323,6 +323,44 @@ const QUIZ_CATEGORIES = [
   { cat: 'Majburiy', icon: '⚡', title: 'Majburiy testlar' }
 ];
 
+const ATTESTATSIYA_QUESTIONS = [
+  { q: "1. Quyidagi qadimgi davrdagi davlatlar kimlarning davrida yuksalganini toping?\n1) Ahmoniylar imperiyasi   2) Xan imperiyasi   3) Midiya   4) Mauriya\na) Kiaksar   b) Sargon I   c) Ashoka   d) U-Di   e) Kir II", options: ["1-b, 2-a, 3-c, 4-c", "1-e, 2-b, 3-d, 4-c", "1-e, 2-d, 3-a, 4-c", "1-a, 2-b, 3-d, 4-e"], correct: 2 },
+  { q: "2. G.Rozenbax Turkiston general-gubernatorligini boshqargan yillar oralig'ida Chor Rossiyasiga qarshi qo'zg'olonlar bo'lgan hududlar qaysi javobda to'g'ri ko'rsatilgan?\n1) Kalif  2) Xiva  3) Ko'lob  4) Baljuvon  5) Andijon  6) Urgut  7) Jizzax  8) Mingtepa  9) O'ratepa", options: ["2, 3, 4, 6", "1, 2, 3, 4", "2, 5, 6, 7", "1, 3, 4, 5"], correct: 3 },
+  { q: "3. O'rta asrlarda Yevropada Birjalar tashkil topgan shaharlar va ularning yillari bilan moslashtirib belgilang.\n1) Lion  2) Bryugge  3) Antverpen  4) London\na) 1600  b) 1460  c) 1462  d) 1409", options: ["1-a, 2-d, 3-b, 4-c", "1-a, 2-c, 3-b, 4-d", "1-c, 2-d, 3-b, 4-a", "1-d, 2-c, 3-b, 4-a"], correct: 2 },
+  { q: "4. Buyuk Britaniyada 1832-yilgi parlament islohotlari o'tkazilib saylov tartibi o'zgartirildi va natijada qanday islohotlar amalga oshirilgan?", options: ["1, 2, 5, 6", "1, 3, 5, 6", "1, 4, 5, 6", "1, 4, 5, 6"], correct: 0 },
+  { q: "5. Birinchi jahon urushida 1917-yilning mart oyida inglizlar .... shahrini egalladi. Kuzga kelib Usmoniy davlati Arabiston yarimorolini to'la, ......... esa bir qismini boy berdi?", options: ["Damashq, Bag'dod", "Mesopotamiya, Falastin", "Polsha, Boltiqbo'yi", "Bag'dod, Falastin"], correct: 3 },
+  { q: "6. 2002-yilda iyun oyida bo'lib o'tgan umumafg'on Loyya jirg'asida Homid Karzay Afg'oniston prezidenti etib saylandi. Natijada ...............", options: ["Konstitutsiya saylovlar va siyosiy partiyalar tuzish uchun yo'l ochib berdi", "Narkotik susaya bordi", "Afg'onistonga 5 mlrd dollar xalqaro yordam ajratildi", "Abdulla Abdulla hukumat raisi etib saylandi"], correct: 2 },
+  { q: "7. Quyida keltirilganlardan qaysilarida davlat-shaxs-voqea mos ravishda berilgan?", options: ["1, 3, 4", "2, 3, 4", "1, 3, 5", "2, 4, 5"], correct: 2 },
+  { q: "8. Qo'qon xonlari bosib olgan hududlarni moslashtiring?\n1) Abdurahimbiy  2) Erdonabiy  3) Norbo'tabiy\na) O'sh  b) Chust  c) Xo'jand  d) Toshkent", options: ["1-c, 2-a, 3-b", "1-b, 2-a, 3-c", "1-c, 2-b, 3-a", "1-c, 2-a, 3-d"], correct: 0 },
+  { q: "9. 1942-yil martda kimlarning tashabbuslari bilan Turkiston legioniga asos solgan shaxslarni aniqlang.", options: ["2, 4", "1, 4", "1, 2", "2, 3"], correct: 1 },
+  { q: "10. Quyidagi ma'lumotlarni tahlil qilib, Eyler-Venn diagrammasiga mos keladigan javobni toping.", options: ["I-b, d; II-a, e; III-c", "I-a, d; II-b, e; III-c", "I-b, a; II-d, e; III-c", "I-a, e; II-b, d; III-c"], correct: 3 },
+  { q: "11. Minglar davrida tarix ilmi rivojiga katta hissa qo'shgan quyidagi allomalarning yozgan asarlari mos ravishda berilgan javobni toping.", options: ["1-b, 2-a", "1-b, 2-c", "1-c, 2-b", "1-c, 2-a"], correct: 0 },
+  { q: "12. Quyidagi jadvalda ma'lumotlar to'g'ri moslashtirilgan qatorlarni toping.", options: ["1, 2, 3", "1, 3, 5", "4, 5, 6", "2, 4, 6"], correct: 1 },
+  { q: "13. Quyidagilardan faqat to'g'ri ma'lumotlar berilgan javobni aniqlang.", options: ["1, 3, 5", "2, 3, 5", "2, 3, 4", "2, 4, 5"], correct: 1 },
+  { q: "14. Mustaqil O'zbekiston Respublikasi tarixidagi quyidagi voqealarni xronologik tartibda joylashtiring.", options: ["1, 4, 5, 2, 3", "1, 4, 5, 3, 2", "5, 1, 2, 3, 4", "1, 4, 3, 2, 5"], correct: 0 },
+  { q: "15. Quyidagi olimlarni amalga oshirgan kashfiyotlari bilan mos ravishda berilgan javobni aniqlang.", options: ["1-a, 2-b, 3-c, 4-d", "1-b, 2-a, 3-c, 4-d", "1-a, 2-b, 3-d, 4-c", "1-d, 2-b, 3-c, 4-a"], correct: 0 },
+  { q: "16. Xaritada 35-raqam bilan belgilangan hudud (davlat) tarixi bilan bog'liq to'g'ri ma'lumot berilgan javobni toping.", options: ["Ichki holatning og'irligiga qaramasdan 1990-yillari iqtisodiy o'sishni jadallashtirishga erishildi", "1990-yillardagi Osiyo inqirozi juda qattiq ta'sir ko'rsatdi", "1991-yili konstitutsiya qabul qilindi", "hokimiyatni Oliy milliy kengashga berish to'g'risida 1991-yil oktabrda yakunlangan Parij konferensiyasida qaror qilindi"], correct: 0 },
+  { q: "17. To'g'ri ma'lumot berilgan javobni toping.", options: ["1991-yil mayda O'zbekistonda zamonaviy shaklda, yangi tipdagi soliq tizimi vujudga keldi", "2016-yilda 2-sentabrdagi qarorga ko'ra O'zbekistonda 5-sentabrdan yuridik va jismoniy shaxslar xorijiy valyutani hech qanday cheklovlarsiz almashtirishni boshladi", "2006-yil \"Ijtimoiy himoya yili\"", "2017-yili 30-sentabrda Maktabgacha ta'lim tizimini boshqarishni takomillashtirish to'g'risida farmon imzolandi"], correct: 3 },
+  { q: "18. Quyidagi atamalarning izohlari mos ravishda berilgan javobni toping.", options: ["1-b, 2-d, 3-c", "1-a, 2-d, 3-b", "1-a, 2-b, 3-d", "1-a, 2-c, 3-d"], correct: 3 },
+  { q: "19. Xiva xonligi va ular davrida amalga oshirilgan ishlar mos bo'lgan javobni aniqlang.", options: ["1-e, f; 2-b, g; 3-a, d", "1-b, d; 2-a, f, g; 3-b, d", "1-c, e; 2-b, d; 3-a, f, g", "1-e, f; 2-a, c; 3-b, g"], correct: 0 },
+  { q: "20. Quyidagi tarixiy voqealarni xronologik ketma-ketlikda joylashtiring.", options: ["3, 1, 4, 5, 2", "3, 1, 2, 4, 5", "3, 1, 2, 5, 4", "5, 2, 3, 4, 1"], correct: 1 },
+  { q: "21. Quyidagi grafikda qaysi raqam ostida davlat va rahbarlari bir-biriga muvofiq keladi?", options: ["1, 3, 6, 7", "2, 4, 6, 7", "2, 3, 4, 5", "1, 3, 5, 7"], correct: 3 },
+  { q: "22. Qaysi qatorlarda davlat, hukmdor va hukmronlik yillari to'g'ri berilgan?", options: ["3, 4, 6", "1, 3, 5", "2, 3, 6", "2, 4, 6"], correct: 2 },
+  { q: "23. Quyidagi jadvalning qaysi qatorlaridagi ma'lumotlar bir-biriga mos ravishda to'g'ri berilgan?", options: ["1, 4, 5", "2, 4, 6", "1, 4, 6", "2, 3, 6"], correct: 2 },
+  { q: "24. Qadimgi Yunon-Baqtriya davlatidagi hukmdorlarning qilgan ishlari bilan to'g'ri muvofiqlashtiring.", options: ["1-c, 2-a, 3-b", "1-b, 2-c, 3-a", "1-a, 2-c, 3-b", "1-b, 2-a, 3-c"], correct: 1 },
+  { q: "25. Quyidagi tarixiy shaxslarni ular chizgan asarlari bilan muvofiqlashtiring.", options: ["1-c, 2-a, 3-b, 4-d", "1-d, 2-a, 3-c, 4-b", "1-d, 2-b, 3-a, 4-c", "1-a, 2-d, 3-b, 4-c"], correct: 2 },
+  { q: "26. O'zbekiston Kompartiyasi Markaziy Komitetining birinchi sekretarlari va ularga tegishli bo'lgan mulohazalar bilan muvofiqlashtiring.", options: ["1-c, 2-b, 3-d", "1-d, 2-a, 3-c", "1-b, 2-d, 3-a", "1-c, 2-b, 3-a"], correct: 3 },
+  { q: "27. Berilgan janglarda kimlar qatnashganligi bilan muvofiqlashtiring.", options: ["1-d, 2-a, 3-b, 4-c, 5-e", "1-c, 2-a, 3-b, 4-e, 5-d", "1-a, 2-e, 3-d, 4-c, 5-b", "1-c, 2-e, 3-d, 4-a, 5-b"], correct: 0 },
+  { q: "28. Qoraxoniylar davridagi boshqaruv tizimidagi lavozimlarni to'g'ri muvofiqlashtiring.", options: ["1-b, 2-d, 3-c, 4-a", "1-c, 2-a, 3-d, 4-b", "1-a, 2-d, 3-c, 4-b", "1-a, 2-d, 3-b, 4-c"], correct: 2 },
+  { q: "29. Quyidagi jadval asosida mos siyosiy voqealarni toping.", options: ["1, 4, 6", "1, 3, 6", "1, 3, 5", "2, 4, 6"], correct: 1 },
+  { q: "30. XIX asr oxiri - XX asr boshlarida metalni qayta ishlovchi asosiy ustaxonalar qaysi shaharlarda joylashgan?", options: ["2, 3, 4, 6, 7", "1, 2, 3, 5, 6", "1, 2, 4, 6, 7", "1, 2, 3, 5, 7"], correct: 3 },
+  { q: "31. Quyidagi mazhablar tarqalgan hududlari bilan mos ravishda berilgan javobni aniqlang.", options: ["1-a, 2-d, 3-c, 4-b", "1-c, 2-a, 3-b, 4-b", "1-b, 2-a, 3-c, 4-d", "1-a, 2-b, 3-d, 4-c"], correct: 0 },
+  { q: "32. O'zbekistonda quyidagi shaharlarning yubileyi keng nishonlangan yilni yoshi bilan to'g'ri ko'rsating.", options: ["I.1-a; II.3-c; III.2-a", "I.1-b; II.2-a; III.3-c", "I.2-c; II.1-b; III.3-a", "I.1-b; II.2-c; III.3-a"], correct: 0 },
+  { q: "33. Quyidagi tarixiy voqealarni xronologik ketma-ketlikda joylashtiring.", options: ["2, 3, 4, 1, 5", "2, 3, 5, 1, 4", "2, 3, 1, 4, 5", "4, 1, 3, 5, 4"], correct: 0 },
+  { q: "34. Vizantiyada o'rta asrlarda qaysi fanlar taraqqiy etgan?", options: ["1, 4, 5", "2, 3, 5", "1, 3, 5", "1, 3, 4"], correct: 2 },
+  { q: "35. Quyidagilardan XV asrda yuz bergan voqealarni aniqlang.", options: ["3, 4, 5", "1, 3, 4", "1, 2, 5", "2, 3, 4"], correct: 1 }
+];
+
 let currentUser = "";
 let currentAvatar = "";
 let currentCategory = "";
@@ -476,11 +514,14 @@ function renderQuizSets(){
     card.innerHTML = `<div class="quizset-icon">${c.icon}</div><div class="quizset-body"><div class="quizset-title">${c.title}</div><div class="quizset-desc" id="desc-${c.cat}">Tekshirilmoqda...</div></div>`;
     list.appendChild(card);
 
-    if(db){
+    let count = (c.cat === 'Attestatsiya') ? ATTESTATSIYA_QUESTIONS.length : 0;
+    if(count > 0){
+      applyCategoryState(card, c, count);
+    } else if(db){
       db.ref('tests/' + c.cat).once('value', snap => {
-        let count = 0;
-        if(snap.exists()) snap.forEach(() => { count++; });
-        applyCategoryState(card, c, count);
+        let dbCount = 0;
+        if(snap.exists()) snap.forEach(() => { dbCount++; });
+        applyCategoryState(card, c, dbCount);
       }, () => { applyCategoryState(card, c, 0); });
     } else {
       applyCategoryState(card, c, 0);
@@ -520,6 +561,10 @@ document.getElementById('modeUntimedBtn').addEventListener('click', () => {
 });
 
 function loadQuestionsAndStart(){
+  if(currentCategory === 'Attestatsiya'){
+    startQuizWithList(ATTESTATSIYA_QUESTIONS);
+    return;
+  }
   if(!db){
     showToast("Ma'lumotlar bazasiga ulanib bo'lmadi!");
     showScreen('quizlist');
@@ -546,7 +591,7 @@ function startQuizWithList(qList){
   userAnswers = new Array(qList.length).fill(null);
   
   if(isTimedMode){
-    timeLeft = qList.length * 120;
+    timeLeft = qList.length * 120; // 35 ta savol uchun 70 daqiqa
     startTimer();
     document.getElementById('quizTimer').style.display = 'block';
   } else {
