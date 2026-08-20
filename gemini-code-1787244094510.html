@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tarix Test Web App</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+  :root{
+    --ink:#14152B;
+    --ink-soft: rgba(42,32,58,0.55);
+    --paper:#F7F4EC;
+    --gold:#FFD23F;
+    --coral:#FF5A7A;
+    --mint:#3DDC97;
+    --violet:#8B5CF6;
+    --blue:#2E5EAA;
+    --line: rgba(255,255,255,0.16);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(160deg, #241536 0%, #171233 40%, #14152B 100%);
+    color: var(--paper);
+    min-height: 100vh;
+    display:flex;
+    justify-content:center;
+    overflow-x:hidden;
+  }
+  #app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding: 20px 18px 40px;
+    position:relative;
+    z-index:1;
+  }
+  .authors-bar{
+    font-size: 11px;
+    color: var(--gold);
+    background: rgba(255,210,63,0.08);
+    border: 1px solid var(--line);
+    padding: 6px 10px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  .authors-bar a{ color: var(--gold); text-decoration: none; font-weight: bold; }
+  .eyebrow{ font-family:'IBM Plex Mono', monospace; letter-spacing: 0.18em; text-transform:uppercase; font-size:11px; color: var(--gold); margin-bottom:6px; }
+  h1{ font-family: 'Space Grotesk','Inter',sans-serif; font-weight:700; font-size:26px; margin-bottom:8px; }
+  .sub{ color: rgba(247,244,236,0.65); font-size:14.5px; line-height:1.5; margin-bottom:24px; }
+  .screen{ display:none; flex-direction:column; flex:1; animation: fade .3s ease; }
+  .screen.active{ display:flex; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  input[type=text], input[type=password], select, textarea{
+    width:100%; padding:14px 16px; border-radius:12px; border:1px solid var(--line);
+    background: var(--ink-soft); color: var(--paper); font-size:16px; font-family:inherit; margin-bottom:14px;
+  }
+  input:focus, select:focus, textarea:focus{ outline:none; border-color: var(--gold); }
+  button{ font-family:inherit; cursor:pointer; border:none; }
+  .btn-primary{
+    background: var(--gold); color: var(--ink); font-weight:700; font-size:15.5px;
+    padding:15px 20px; border-radius:12px; width:100%; box-shadow: 0 10px 24px rgba(242,183,5,0.18); margin-bottom: 10px;
+  }
+  .btn-secondary{
+    background: transparent; color: var(--paper); border:1px solid var(--line) !important;
+    font-size:14.5px; padding:13px 18px; border-radius:12px; width:100%; margin-top:10px;
+  }
+  .progress-row{ display:flex; align-items:center; gap:10px; margin-bottom:22px; }
+  .progress-track{ flex:1; height:6px; background: rgba(247,244,236,0.12); border-radius:99px; overflow:hidden; }
+  .progress-fill{ height:100%; background: var(--gold); border-radius:99px; transition: width .3s ease; }
+  .progress-num{ font-family:'IBM Plex Mono', monospace; font-size:12.5px; color: rgba(247,244,236,0.6); }
+
+  .q-text{ font-family:'Space Grotesk','Inter',sans-serif; font-size:20px; font-weight:600; line-height:1.4; margin-bottom:22px; white-space:pre-line; }
+  .opt{
+    display:flex; align-items:center; gap:12px; padding:15px 16px; border-radius:12px;
+    border:1px solid var(--line); background: var(--ink-soft); margin-bottom:10px; font-size:15px; cursor:pointer;
+  }
+  .opt-letter{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; width:24px; height:24px; border-radius:50%;
+    border:1px solid rgba(247,244,236,0.3); display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .opt.correct{ border-color: var(--mint); background: rgba(61,220,151,0.12); }
+  .opt.wrong{ border-color: var(--coral); background: rgba(255,107,107,0.12); }
+  .opt.correct .opt-letter{ background: var(--mint); color: var(--ink); }
+  .opt.wrong .opt-letter{ background: var(--coral); color: var(--ink); }
+
+  .tabbar{ display:flex; gap:4px; background: var(--ink); border-bottom:1px solid var(--line); padding: 0 0 12px; margin-bottom:18px; }
+  .tab-item{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:7px 2px; border-radius:12px; background:transparent; color: rgba(247,244,236,0.5); }
+  .tab-item.active{ background: var(--gold); color: var(--ink); }
+  .tab-icon{ font-size:15px; }
+  .tab-lbl{ font-size:8.5px; font-weight:600; }
+
+  .xp-strip{ display:flex; align-items:center; gap:10px; background: var(--ink-soft); border:1px solid var(--line); border-radius:14px; padding:10px 14px; margin-bottom:16px; }
+  .xp-level-badge{ font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700; color: var(--ink); background: var(--gold); border-radius:8px; padding:5px 8px; }
+  .xp-info{ flex:1; min-width:0; }
+  .xp-title{ font-size:12px; font-weight:600; color: var(--paper); margin-bottom:4px; }
+  .xp-track{ height:5px; background: rgba(247,244,236,0.12); border-radius:99px; overflow:hidden; }
+  .xp-fill{ height:100%; background: linear-gradient(90deg, var(--gold), var(--mint)); border-radius:99px; }
+
+  .quizset-card{
+    display:flex; align-items:center; gap:14px; background: var(--ink-soft); border:1px solid var(--line);
+    border-radius:16px; padding:16px; margin-bottom:12px; cursor:pointer;
+  }
+  .quizset-icon{ width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:22px; background: rgba(255,210,63,0.12); flex-shrink:0; }
+  .quizset-body{ flex:1; min-width:0; }
+  .quizset-title{ font-family:'Space Grotesk','Inter',sans-serif; font-size:15.5px; font-weight:600; margin-bottom:3px; }
+  .quizset-desc{ font-size:12.5px; color: rgba(247,244,236,0.55); }
+  .quizset-card.disabled{ opacity:0.4; cursor:not-allowed; }
+  .quizset-badge{ font-size:10.5px; font-weight:700; color: var(--ink); background: var(--gold); border-radius:6px; padding:2px 7px; margin-left:8px; vertical-align:middle; }
+
+  .badge-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+  .badge-item{ background: var(--ink-soft); border: 1px solid var(--line); border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; }
+  .badge-logo{ width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin: 0 auto 6px; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; background: #241536; }
+
+  .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 20px; padding: 10px; background: var(--ink-soft); border-radius: 16px; border: 1px solid var(--line); }
+  .podium-step { text-align: center; border-radius: 10px 10px 0 0; padding: 8px; color: var(--ink); font-weight: bold; width: 30%; }
+  .podium-1 { background: var(--gold); height: 110px; }
+  .podium-2 { background: #C0C0C0; height: 85px; }
+  .podium-3 { background: #CD7F32; height: 70px; }
+
+  .lb-row{ display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:12px; margin-bottom:8px; background: var(--ink-soft); border:1px solid var(--line); }
+  .lb-row.me{ border-color: var(--gold); background: rgba(242,183,5,0.08); }
+  .lb-pos{ font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:15px; width:26px; color: rgba(247,244,236,0.5); }
+  .lb-name{ flex:1; font-size:14.5px; font-weight:500; }
+  .lb-score{ font-family:'IBM Plex Mono', monospace; font-size:14px; color: var(--gold); }
+  .lb-avatar{ width:34px; height:34px; border-radius:50%; object-fit:cover; border:1px solid var(--line); background:#241536; display:flex; align-items:center; justify-content:center; }
+
+  .toast{
+    position:fixed; top:18px; left:50%; transform:translateX(-50%) translateY(-20px);
+    background: var(--gold); color: var(--ink); font-weight:700; font-size:13px; padding:10px 18px; border-radius:99px;
+    opacity:0; transition: opacity .25s ease, transform .25s ease; z-index:10000;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="authors-bar">
+    Mualliflar: <b>Usmonov Dilmurod, Normurodov Farrux</b> | Kanal: <a href="https://t.me/Iqro_tarix" target="_blank">@Iqro_tarix</a>
+  </div>
+
+  <div class="tabbar" id="tabbar" style="display:none;">
+    <button class="tab-item" data-tab="home"><span class="tab-icon">&#8962;</span><span class="tab-lbl">Bosh</span></button>
+    <button class="tab-item" data-tab="quizlist"><span class="tab-icon">?</span><span class="tab-lbl">Testlar</span></button>
+    <button class="tab-item" data-tab="vocab"><span class="tab-icon">&#9776;</span><span class="tab-lbl">Atamalar</span></button>
+    <button class="tab-item" data-tab="leaderboard"><span class="tab-icon">&#9733;</span><span class="tab-lbl">Reyting</span></button>
+    <button class="tab-item" data-tab="profile"><span class="tab-icon">&#9787;</span><span class="tab-lbl">Profil</span></button>
+  </div>
+
+  <div class="xp-strip" id="xpStrip" style="display:none;">
+    <div class="xp-level-badge" id="xpLevelBadge">LVL 1</div>
+    <div class="xp-info">
+      <div class="xp-title" id="xpTitle">Tarixshunos</div>
+      <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%;"></div></div>
+    </div>
+  </div>
+
+  <!-- BOSH SAHIFA -->
+  <div class="screen" id="screen-home">
+    <h1>Tarix Fanidan Testlar</h1>
+    <p class="sub">Attestatsiya, MS, Olimpiada, DTM va Majburiy testlar tizimi.</p>
+    <button class="btn-primary" id="homeStartBtn">Test ishlashni boshlash</button>
+    <button class="btn-secondary" id="openTeacherModal">O'qituvchi paneli</button>
+  </div>
+
+  <!-- TESTLAR BO'LIMLARI -->
+  <div class="screen active" id="screen-quizlist">
+    <div class="eyebrow">Mavzular</div>
+    <h1 style="font-size:22px; margin-bottom:16px;">Test bo'limini tanlang</h1>
+    <div id="quizCategoriesList"></div>
+  </div>
+
+  <!-- REJIM VA VAQT TANLASH -->
+  <div class="screen" id="screen-mode-select">
+    <div class="eyebrow">Rejim</div>
+    <h1 id="selectedCatTitle">Bo'lim</h1>
+    <p class="sub">Test ishlash tartibini tanlang:</p>
+    <button class="btn-primary" id="modeTimedBtn">⏱ Vaqtli rejim (Belgilangan vaqt chegarasi bilan)</button>
+    <button class="btn-secondary" id="modeUntimedBtn" style="margin-top:10px;">⏳ Vaqtsiz rejim (Cheksiz vaqt)</button>
+    <button class="btn-secondary" id="backToCatBtn" style="margin-top:10px;">Orqaga</button>
+  </div>
+
+  <!-- ATAMALAR -->
+  <div class="screen" id="screen-vocab">
+    <div class="eyebrow">Ma'lumotnoma</div>
+    <h1>Tarixiy Atamalar</h1>
+    <div id="vocabList" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- TEST EKRANI -->
+  <div class="screen" id="screen-quiz">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <button class="btn-secondary" id="quizBackBtn" style="width:auto; padding:6px 12px; margin:0;">Chiqish</button>
+      <div id="quizTimer" style="font-family:'IBM Plex Mono',monospace; color:var(--gold); font-weight:700;">--:--</div>
+    </div>
+    <div class="progress-row" style="margin-top:14px;">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-num" id="progressNum">1/10</div>
+    </div>
+    <div class="q-text" id="qText"></div>
+    <div id="optsWrap"></div>
+    <div class="quiz-nav" style="margin-top:15px;">
+      <button class="btn-primary" id="nextQBtn">Keyingi savol</button>
+    </div>
+  </div>
+
+  <!-- NATIJA -->
+  <div class="screen" id="screen-result">
+    <div class="eyebrow">Natija</div>
+    <div class="score-big" style="font-size:36px; font-weight:700; color:var(--gold); margin-bottom:10px;"><span id="resultScore">0</span><span id="resultOf">/10</span></div>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-val" id="statCorrect" style="color:var(--mint);">0</div><div class="stat-lbl">To'g'ri</div></div>
+      <div class="stat"><div class="stat-val" id="statWrong" style="color:var(--coral);">0</div><div class="stat-lbl">Xato</div></div>
+      <div class="stat"><div class="stat-val" id="statPercent">0%</div><div class="stat-lbl">Foiz</div></div>
+    </div>
+    <div id="resultDetails" style="margin-top:15px; max-height:220px; overflow-y:auto; font-size:13.5px; background:var(--ink-soft); padding:10px; border-radius:12px;"></div>
+    <button class="btn-primary" id="retryBtn" style="margin-top:20px;">Bosh sahifaga qaytish</button>
+  </div>
+
+  <!-- REYTING -->
+  <div class="screen" id="screen-leaderboard">
+    <div class="eyebrow">Reyting</div>
+    <h1>Eng yaxshi natijalar</h1>
+    <div id="podiumBox" class="podium-container" style="display:none;"></div>
+    <div id="lbList" style="margin-top:10px;">Yuklanmoqda...</div>
+  </div>
+
+  <!-- PROFIL VA NISHONLAR -->
+  <div class="screen" id="screen-profile">
+    <div class="profile-head" style="text-align:center; margin-top:10px;">
+      <div style="margin-bottom:8px;">
+        <img id="profileImgPreview" src="" style="width:70px; height:70px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); display:none; margin:0 auto;">
+      </div>
+      <input type="text" id="editNameInput" placeholder="Ismingizni tahrirlash" style="text-align:center; font-weight:bold; font-size:18px; margin-bottom:6px;">
+      <input type="text" id="editAvatarInput" placeholder="Rasm havolasini (URL) kiriting" style="font-size:13px; margin-bottom:10px;">
+      <button class="btn-primary" id="saveProfileBtn" style="padding:10px; font-size:14px; margin-bottom:15px;">Profilni saqlash</button>
+    </div>
+    <div class="profile-stat-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:5px;">
+      <div class="profile-stat-card stat"><div class="profile-stat-val" id="statTests">0</div><div class="profile-stat-lbl">Yechilgan test</div></div>
+      <div class="profile-stat-card stat"><div class="profile-stat-val" id="statAvg">0%</div><div class="profile-stat-lbl">O'rtacha natija</div></div>
+    </div>
+    <h3 style="margin-top:20px; font-size:16px;">Sizning nishonlaringiz (Ustiga bosing)</h3>
+    <div class="badge-grid" id="profileBadges"></div>
+  </div>
+
+  <!-- O'QITUVCHI PANELI -->
+  <div class="screen" id="screen-teacher">
+    <div class="eyebrow">Admin Panel</div>
+    <h1>O'qituvchi Paneli</h1>
+    <div id="teacherLoginBox">
+      <p class="sub">Davom etish uchun parolni kiriting:</p>
+      <input type="password" id="teacherPass" placeholder="Parol">
+      <button class="btn-primary" id="teacherLoginBtn">Kirish</button>
+      <button class="btn-secondary" id="teacherBackBtn">Orqaga</button>
+    </div>
+    <div id="teacherDashboard" style="display:none;">
+      <h3 style="margin:10px 0;">Word fayl orqali test yuklash</h3>
+      <select id="tCategory">
+        <option value="Attestatsiya">Attestatsiya</option>
+        <option value="MS">MS</option>
+        <option value="Olimpiada">Olimpiada</option>
+        <option value="DTM">DTM</option>
+        <option value="Majburiy">Majburiy</option>
+      </select>
+      
+      <p class="sub" style="font-size:13px; margin-bottom:8px;">(.docx formatdagi Word faylni tanlang)</p>
+      <input type="file" id="wordFileInput" accept=".docx" style="padding:10px; background:var(--ink-soft); border-radius:12px; border:1px solid var(--line); margin-bottom:14px; width:100%; color:var(--paper);">
+      <button class="btn-primary" id="uploadWordBtn">Word faylni yuklash va tahlil qilish</button>
+      
+      <h3 style="margin:20px 0 10px;">O'quvchilar bo'limlar va foizlar bo'yicha</h3>
+      <div id="teacherStudentsList" style="max-height:250px; overflow-y:auto; background:var(--ink-soft); padding:10px; border-radius:12px;"></div>
+      <button class="btn-secondary" id="teacherLogoutBtn" style="margin-top:15px;">Chiqish</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* --- FIREBASE ULANISHI --- */
+const firebaseConfig = {
+  apiKey: "AIzaSyAEvrj_qZohqGIBt3JCzC4QQ0jLNbZc4js",
+  authDomain: "english-test-c7f57.firebaseapp.com",
+  databaseURL: "https://english-test-c7f57-default-rtdb.firebaseio.com",
+  projectId: "english-test-c7f57",
+  storageBucket: "english-test-c7f57.firebasestorage.app",
+  messagingSenderId: "809563193589",
+  appId: "1:809563193589:web:1a6578b812458c1d6d45bc"
+};
+let db = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+} catch(e) {
+  console.error("Firebase ulanishda xatolik:", e);
+}
+
+const BADGES_INFO = {
+  nika: { name: "Nika", desc: "100% natija ko'rsatgan bilimdon uchun", img: "https://images.unsplash.com/photo-1599725534064-16a735e5d3ea?w=150&auto=format&fit=crop&q=80" },
+  klio: { name: "Klio", desc: "1 ta testni muvaffaqiyatli yechgan tarixchi", img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=150&auto=format&fit=crop&q=80" },
+  gerakl: { name: "Gerakl", desc: "Matonat ko'rsatib ko'p test ishlaganlar uchun", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=150&auto=format&fit=crop&q=80" },
+  spartak: { name: "300 spartak", desc: "Umumiy reytingda 300 ta savolga to'g'ri javob", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=150&auto=format&fit=crop&q=80" },
+  shahrizoda: { name: "Shahrizoda", desc: "Umumiy reytingda 1001 ta savolga to'g'ri javob", img: "https://images.unsplash.com/photo-1566127444979-b3d2b654e3d7?w=150&auto=format&fit=crop&q=80" },
+  selsiy: { name: "Selsiy", desc: "Reytingda eng yuqori natija qayd etganlar uchun", img: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=150&auto=format&fit=crop&q=80" },
+  karl: { name: "Buyuk Karl", desc: "Tarix fanidan faol ishtirokchi mukofoti", img: "https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?w=150&auto=format&fit=crop&q=80" }
+};
+
+const HISTORY_VOCAB = [
+  { term: "Amir Temur", desc: "1336–1405 yillarda yashagan buyuk sarkarda va davlat arbobi." },
+  { term: "Buyuk Ipak yo'li", desc: "Qadimgi va o'rta asrlarda Sharq va G'arbni bog'lagan yo'llar." }
+];
+
+let currentUser = "";
+let currentAvatar = "";
+let currentCategory = "";
+let isTimedMode = true;
+let currentQuestions = [];
+let currentIndex = 0;
+let userAnswers = [];
+let score = 0;
+let timerInterval = null;
+let timeLeft = 0;
+
+const screens = {
+  home: document.getElementById('screen-home'),
+  quizlist: document.getElementById('screen-quizlist'),
+  vocab: document.getElementById('screen-vocab'),
+  quiz: document.getElementById('screen-quiz'),
+  result: document.getElementById('screen-result'),
+  leaderboard: document.getElementById('screen-leaderboard'),
+  profile: document.getElementById('screen-profile'),
+  modeSelect: document.getElementById('screen-mode-select'),
+  teacher: document.getElementById('screen-teacher')
+};
+
+const tabbar = document.getElementById('tabbar');
+const tabItems = document.querySelectorAll('.tab-item');
+
+function showScreen(name){
+  Object.values(screens).forEach(s => s.classList.remove('active'));
+  if(screens[name]) screens[name].classList.add('active');
+  const TAB_SCREENS = ['home','quizlist','vocab','leaderboard','profile'];
+  if(TAB_SCREENS.includes(name)){
+    tabbar.style.display = 'flex';
+    document.getElementById('xpStrip').style.display = 'flex';
+    tabItems.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  } else {
+    tabbar.style.display = 'none';
+    document.getElementById('xpStrip').style.display = 'none';
+  }
+}
+
+tabItems.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    showScreen(tab);
+    if(tab === 'home') renderHome();
+    if(tab === 'quizlist') renderQuizSets();
+    if(tab === 'vocab') renderVocab();
+    if(tab === 'leaderboard') renderLeaderboard();
+    if(tab === 'profile') renderProfile();
+  });
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  let nameToUse = "O'quvchi";
+  try{
+    if(window.Telegram && window.Telegram.WebApp){
+      Telegram.WebApp.ready();
+      Telegram.WebApp.expand();
+      const tgUser = Telegram.WebApp.initDataUnsafe?.user;
+      if(tgUser){
+        const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ');
+        if(fullName) nameToUse = fullName;
+      }
+    }
+  }catch(e){}
+
+  const saved = localStorage.getItem('history_user');
+  const savedAvatar = localStorage.getItem('history_avatar');
+  currentUser = saved || nameToUse;
+  currentAvatar = savedAvatar || '';
+
+  localStorage.setItem('history_user', currentUser);
+  syncUserToFirebase();
+  showScreen('quizlist');
+  renderQuizSets();
+});
+
+function showToast(text){
+  let toast = document.getElementById('appToast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'appToast';
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = text;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1600);
+}
+
+function getXP(){ return parseInt(localStorage.getItem('history_xp') || '0', 10); }
+function setXP(val){ 
+  localStorage.setItem('history_xp', String(val)); 
+  renderXpStrip();
+  syncUserToFirebase();
+}
+function levelFromXP(xp){ return Math.min(Math.floor(xp / 100) + 1, 5); }
+function renderXpStrip(){
+  const xp = getXP();
+  const lvl = levelFromXP(xp);
+  const inLvl = xp % 100;
+  document.getElementById('xpLevelBadge').textContent = 'LVL ' + lvl;
+  document.getElementById('xpFill').style.width = inLvl + '%';
+  document.getElementById('xpTitle').textContent = currentUser || 'Tarixshunos';
+}
+
+function syncUserToFirebase(){
+  if(!db || !currentUser) return;
+  const xp = getXP();
+  const logs = JSON.parse(localStorage.getItem('history_logs') || '[]');
+  const safeKey = currentUser.replace(/[.#$\/\[\]]/g, "_");
+  
+  let catsData = {};
+  logs.forEach(l => {
+    if(l.category){
+      if(!catsData[l.category]){
+        catsData[l.category] = { totalTests: 0, totalPercent: 0 };
+      }
+      catsData[l.category].totalTests++;
+      catsData[l.category].totalPercent += l.percent;
+    }
+  });
+
+  db.ref('history_users/' + safeKey).set({
+    name: currentUser,
+    avatar: currentAvatar,
+    xp: xp,
+    testsCount: logs.length,
+    categories: catsData,
+    lastActive: Date.now()
+  });
+}
+
+function renderHome(){
+  renderXpStrip();
+}
+
+document.getElementById('homeStartBtn').addEventListener('click', () => {
+  showScreen('quizlist');
+  renderQuizSets();
+});
+
+const QUIZ_CATEGORIES = [
+  { cat: 'Attestatsiya', icon: '🏆', title: 'Attestatsiya testi-1' },
+  { cat: 'MS', icon: '🥇', title: 'MS Test' },
+  { cat: 'Olimpiada', icon: '🏅', title: 'Olimpiada' },
+  { cat: 'DTM', icon: '📚', title: 'DTM Testlari' },
+  { cat: 'Majburiy', icon: '⚡', title: 'Majburiy testlar' }
+];
+
+function renderQuizSets(){
+  const list = document.getElementById('quizCategoriesList');
+  list.innerHTML = '';
+  QUIZ_CATEGORIES.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'quizset-card';
+    card.dataset.cat = c.cat;
+    card.innerHTML = `<div class="quizset-icon">${c.icon}</div><div class="quizset-body"><div class="quizset-title">${c.title}</div><div class="quizset-desc" id="desc-${c.cat}">Tekshirilmoqda...</div></div>`;
+    list.appendChild(card);
+
+    const localCount = getDefaultQuestions(c.cat).length;
+    if(localCount > 0){
+      applyCategoryState(card, c, localCount);
+    } else if(db){
+      db.ref('tests/' + c.cat).once('value', snap => {
+        let count = 0;
+        if(snap.exists()) snap.forEach(() => { count++; });
+        applyCategoryState(card, c, count);
+      }, () => { applyCategoryState(card, c, 0); });
+    } else {
+      applyCategoryState(card, c, 0);
+    }
+  });
+}
+
+function applyCategoryState(card, c, count){
+  const desc = card.querySelector('.quizset-desc');
+  if(count > 0){
+    let timeMin = count * 2;
+    desc.textContent = `${count} ta savol • ${timeMin} daqiqa`;
+    card.classList.remove('disabled');
+    card.onclick = () => {
+      currentCategory = c.cat;
+      document.getElementById('selectedCatTitle').textContent = c.title;
+      showScreen('modeSelect');
+    };
+  } else {
+    desc.innerHTML = `Hozircha savollar yo'q <span class="quizset-badge">Tez orada</span>`;
+    card.classList.add('disabled');
+    card.onclick = () => showToast("Bu bo'lim uchun hali savollar yuklanmagan!");
+  }
+}
+
+document.getElementById('backToCatBtn').addEventListener('click', () => showScreen('quizlist'));
+
+document.getElementById('modeTimedBtn').addEventListener('click', () => {
+  isTimedMode = true;
+  loadQuestionsAndStart();
+});
+
+document.getElementById('modeUntimedBtn').addEventListener('click', () => {
+  isTimedMode = false;
+  loadQuestionsAndStart();
+});
+
+const ATTESTATSIYA_QUESTIONS = [
+{ q: "1. Quyidagi qadimgi davrdagi davlatlar kimlarning davrida yuksalganini toping?\n1) Ahmoniylar imperiyasi   2) Xan imperiyasi   3) Midiya   4) Mauriya\na) Kiaksar   b) Sargon I   c) Ashoka   d) U-Di   e) Kir II", options: ["1-b, 2-a, 3-c, 4-c", "1-e, 2-b, 3-d, 4-c", "1-e, 2-d, 3-a, 4-c", "1-a, 2-b, 3-d, 4-e"], correct: 2 },
+{ q: "2. G.Rozenbax Turkiston general-gubernatorligini boshqargan yillar oralig'ida Chor Rossiyasiga qarshi qo'zg'olonlar bo'lgan hududlar qaysi javobda to'g'ri ko'rsatilgan?\n1) Kalif  2) Xiva  3) Ko'lob  4) Baljuvon  5) Andijon  6) Urgut  7) Jizzax  8) Mingtepa  9) O'ratepa", options: ["2, 3, 4, 6", "1, 2, 3, 4", "2, 5, 6, 7", "1, 3, 4, 5"], correct: 3 },
+{ q: "3. O'rta asrlarda Yevropada Birjalar tashkil topgan shaharlar va ularning yillari bilan moslashtirib belgilang.\n1) Lion  2) Bryugge  3) Antverpen  4) London\na) 1600  b) 1460  c) 1462  d) 1409", options: ["1-a, 2-d, 3-b, 4-c", "1-a, 2-c, 3-b, 4-d", "1-c, 2-d, 3-b, 4-a", "1-d, 2-c, 3-b, 4-a"], correct: 2 },
+{ q: "4. Buyuk Britaniyada 1832-yilgi parlament islohotlari o'tkazilib saylov tartibi o'zgartirildi va natijada qanday islohotlar amalga oshirilgan?", options: ["1, 2, 5, 6", "1, 3, 5, 6", "1, 4, 5, 6", "1, 4, 5, 6"], correct: 0 },
+{ q: "5. Birinchi jahon urushida 1917-yilning mart oyida inglizlar .... shahrini egalladi. Kuzga kelib Usmoniy davlati Arabiston yarimorolini to'la, ......... esa bir qismini boy berdi?", options: ["Damashq, Bag'dod", "Mesopotamiya, Falastin", "Polsha, Boltiqbo'yi", "Bag'dod, Falastin"], correct: 3 },
+{ q: "6. 2002-yilda iyun oyida bo'lib o'tgan umumafg'on Loyya jirg'asida Homid Karzay Afg'oniston prezidenti etib saylandi. Natijada ...............", options: ["Konstitutsiya saylovlar va siyosiy partiyalar tuzish uchun yo'l ochib berdi", "Narkotik susaya bordi", "Afg'onistonga 5 mlrd dollar xalqaro yordam ajratildi", "Abdulla Abdulla hukumat raisi etib saylandi"], correct: 2 },
+{ q: "7. Quyida keltirilganlardan qaysilarida davlat-shaxs-voqea mos ravishda berilgan?", options: ["1, 3, 4", "2, 3, 4", "1, 3, 5", "2, 4, 5"], correct: 2 },
+{ q: "8. Qo'qon xonlari bosib olgan hududlarni moslashtiring?\n1) Abdurahimbiy  2) Erdonabiy  3) Norbo'tabiy\na) O'sh  b) Chust  c) Xo'jand  d) Toshkent", options: ["1-c, 2-a, 3-b", "1-b, 2-a, 3-c", "1-c, 2-b, 3-a", "1-c, 2-a, 3-d"], correct: 0 },
+{ q: "9. 1942-yil martda kimlarning tashabbuslari bilan Turkiston legioniga asos solgan shaxslarni aniqlang.", options: ["2, 4", "1, 4", "1, 2", "2, 3"], correct: 1 },
+{ q: "10. Quyidagi ma'lumotlarni tahlil qilib, Eyler-Venn diagrammasiga mos keladigan javobni toping.", options: ["I-b, d; II-a, e; III-c", "I-a, d; II-b, e; III-c", "I-b, a; II-d, e; III-c", "I-a, e; II-b, d; III-c"], correct: 3 },
+{ q: "11. Minglar davrida tarix ilmi rivojiga katta hissa qo'shgan quyidagi allomalarning yozgan asarlari mos ravishda berilgan javobni toping.", options: ["1-b, 2-a", "1-b, 2-c", "1-c, 2-b", "1-c, 2-a"], correct: 0 },
+{ q: "12. Quyidagi jadvalda ma'lumotlar to'g'ri moslashtirilgan qatorlarni toping.", options: ["1, 2, 3", "1, 3, 5", "4, 5, 6", "2, 4, 6"], correct: 1 },
+{ q: "13. Quyidagilardan faqat to'g'ri ma'lumotlar berilgan javobni aniqlang.", options: ["1, 3, 5", "2, 3, 5", "2, 3, 4", "2, 4, 5"], correct: 1 },
+{ q: "14. Mustaqil O'zbekiston Respublikasi tarixidagi quyidagi voqealarni xronologik tartibda joylashtiring.", options: ["1, 4, 5, 2, 3", "1, 4, 5, 3, 2", "5, 1, 2, 3, 4", "1, 4, 3, 2, 5"], correct: 0 },
+{ q: "15. Quyidagi olimlarni amalga oshirgan kashfiyotlari bilan mos ravishda berilgan javobni aniqlang.", options: ["1-a, 2-b, 3-c, 4-d", "1-b, 2-a, 3-c, 4-d", "1-a, 2-b, 3-d, 4-c", "1-d, 2-b, 3-c, 4-a"], correct: 0 },
+{ q: "16. Xaritada 35-raqam bilan belgilangan hudud (davlat) tarixi bilan bog'liq to'g'ri ma'lumot berilgan javobni toping.", options: ["Ichki holatning og'irligiga qaramasdan 1990-yillari iqtisodiy o'sishni jadallashtirishga erishildi", "1990-yillardagi Osiyo inqirozi juda qattiq ta'sir ko'rsatdi", "1991-yili konstitutsiya qabul qilindi", "hokimiyatni Oliy milliy kengashga berish to'g'risida 1991-yil oktabrda yakunlangan Parij konferensiyasida qaror qilindi"], correct: 0 },
+{ q: "17. To'g'ri ma'lumot berilgan javobni toping.", options: ["1991-yil mayda O'zbekistonda zamonaviy shaklda, yangi tipdagi soliq tizimi vujudga keldi", "2016-yilda 2-sentabrdagi qarorga ko'ra O'zbekistonda 5-sentabrdan yuridik va jismoniy shaxslar xorijiy valyutani hech qanday cheklovlarsiz almashtirishni boshladi", "2006-yil \"Ijtimoiy himoya yili\"", "2017-yili 30-sentabrda Maktabgacha ta'lim tizimini boshqarishni takomillashtirish to'g'risida farmon imzolandi"], correct: 3 },
+{ q: "18. Quyidagi atamalarning izohlari mos ravishda berilgan javobni toping.", options: ["1-b, 2-d, 3-c", "1-a, 2-d, 3-b", "1-a, 2-b, 3-d", "1-a, 2-c, 3-d"], correct: 3 },
+{ q: "19. Xiva xonligi va ular davrida amalga oshirilgan ishlar mos bo'lgan javobni aniqlang.", options: ["1-e, f; 2-b, g; 3-a, d", "1-b, d; 2-a, f, g; 3-b, d", "1-c, e; 2-b, d; 3-a, f, g", "1-e, f; 2-a, c; 3-b, g"], correct: 0 },
+{ q: "20. Quyidagi tarixiy voqealarni xronologik ketma-ketlikda joylashtiring.", options: ["3, 1, 4, 5, 2", "3, 1, 2, 4, 5", "3, 1, 2, 5, 4", "5, 2, 3, 4, 1"], correct: 1 },
+{ q: "21. Quyidagi grafikda qaysi raqam ostida davlat va rahbarlari bir-biriga muvofiq keladi?", options: ["1, 3, 6, 7", "2, 4, 6, 7", "2, 3, 4, 5", "1, 3, 5, 7"], correct: 3 },
+{ q: "22. Qaysi qatorlarda davlat, hukmdor va hukmronlik yillari to'g'ri berilgan?", options: ["3, 4, 6", "1, 3, 5", "2, 3, 6", "2, 4, 6"], correct: 2 },
+{ q: "23. Quyidagi jadvalning qaysi qatorlaridagi ma'lumotlar bir-biriga mos ravishda to'g'ri berilgan?", options: ["1, 4, 5", "2, 4, 6", "1, 4, 6", "2, 3, 6"], correct: 2 },
+{ q: "24. Qadimgi Yunon-Baqtriya davlatidagi hukmdorlarning qilgan ishlari bilan to'g'ri muvofiqlashtiring.", options: ["1-c, 2-a, 3-b", "1-b, 2-c, 3-a", "1-a, 2-c, 3-b", "1-b, 2-a, 3-c"], correct: 1 },
+{ q: "25. Quyidagi tarixiy shaxslarni ular chizgan asarlari bilan muvofiqlashtiring.", options: ["1-c, 2-a, 3-b, 4-d", "1-d, 2-a, 3-c, 4-b", "1-d, 2-b, 3-a, 4-c", "1-a, 2-d, 3-b, 4-c"], correct: 2 },
+{ q: "26. O'zbekiston Kompartiyasi Markaziy Komitetining birinchi sekretarlari va ularga tegishli bo'lgan mulohazalar bilan muvofiqlashtiring.", options: ["1-c, 2-b, 3-d", "1-d, 2-a, 3-c", "1-b, 2-d, 3-a", "1-c, 2-b, 3-a"], correct: 3 },
+{ q: "27. Berilgan janglarda kimlar qatnashganligi bilan muvofiqlashtiring.", options: ["1-d, 2-a, 3-b, 4-c, 5-e", "1-c, 2-a, 3-b, 4-e, 5-d", "1-a, 2-e, 3-d, 4-c, 5-b", "1-c, 2-e, 3-d, 4-a, 5-b"], correct: 0 },
+{ q: "28. Qoraxoniylar davridagi boshqaruv tizimidagi lavozimlarni to'g'ri muvofiqlashtiring.", options: ["1-b, 2-d, 3-c, 4-a", "1-c, 2-a, 3-d, 4-b", "1-a, 2-d, 3-c, 4-b", "1-a, 2-d, 3-b, 4-c"], correct: 2 },
+{ q: "29. Quyidagi jadval asosida mos siyosiy voqealarni toping.", options: ["1, 4, 6", "1, 3, 6", "1, 3, 5", "2, 4, 6"], correct: 1 },
+{ q: "30. XIX asr oxiri - XX asr boshlarida metalni qayta ishlovchi asosiy ustaxonalar qaysi shaharlarda joylashgan?", options: ["2, 3, 4, 6, 7", "1, 2, 3, 5, 6", "1, 2, 4, 6, 7", "1, 2, 3, 5, 7"], correct: 3 },
+{ q: "31. Quyidagi mazhablar tarqalgan hududlari bilan mos ravishda berilgan javobni aniqlang.", options: ["1-a, 2-d, 3-c, 4-b", "1-c, 2-a, 3-b, 4-b", "1-b, 2-a, 3-c, 4-d", "1-a, 2-b, 3-d, 4-c"], correct: 0 },
+{ q: "32. O'zbekistonda quyidagi shaharlarning yubileyi keng nishonlangan yilni yoshi bilan to'g'ri ko'rsating.", options: ["I.1-a; II.3-c; III.2-a", "I.1-b; II.2-a; III.3-c", "I.2-c; II.1-b; III.3-a", "I.1-b; II.2-c; III.3-a"], correct: 0 },
+{ q: "33. Quyidagi tarixiy voqealarni xronologik ketma-ketlikda joylashtiring.", options: ["2, 3, 4, 1, 5", "2, 3, 5, 1, 4", "2, 3, 1, 4, 5", "4, 1, 3, 5, 4"], correct: 0 },
+{ q: "34. Vizantiyada o'rta asrlarda qaysi fanlar taraqqiy etgan?", options: ["1, 4, 5", "2, 3, 5", "1, 3, 5", "1, 3, 4"], correct: 2 },
+{ q: "35. Quyidagilardan XV asrda yuz bergan voqealarni aniqlang.", options: ["3, 4, 5", "1, 3, 4", "1, 2, 5", "2, 3, 4"], correct: 1 }
+];
+
+function getDefaultQuestions(cat){
+  if(cat === 'Attestatsiya') return ATTESTATSIYA_QUESTIONS;
+  return [];
+}
+
+function loadQuestionsAndStart(){
+  if(!db){
+    let qList = getDefaultQuestions(currentCategory);
+    if(qList.length === 0){ showToast("Bu bo'lim uchun hozircha savollar mavjud emas!"); showScreen('quizlist'); return; }
+    startQuizWithList(qList);
+    return;
+  }
+  db.ref('tests/' + currentCategory).once('value', snapshot => {
+    let qList = [];
+    if(snapshot.exists()){
+      snapshot.forEach(child => { qList.push(child.val()); });
+    }
+    if(qList.length === 0){
+      qList = getDefaultQuestions(currentCategory);
+    }
+    if(qList.length === 0){
+      showToast("Bu bo'lim uchun hozircha savollar mavjud emas!");
+      showScreen('quizlist');
+      return;
+    }
+    startQuizWithList(qList);
+  });
+}
+
+function startQuizWithList(qList){
+  currentQuestions = qList;
+  currentIndex = 0;
+  score = 0;
+  userAnswers = new Array(qList.length).fill(null);
+  
+  if(isTimedMode){
+    timeLeft = qList.length * 120; // 35 ta savol uchun 70 daqiqa
+    startTimer();
+    document.getElementById('quizTimer').style.display = 'block';
+  } else {
+    document.getElementById('quizTimer').style.display = 'none';
+  }
+  
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function startTimer(){
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    let m = Math.floor(timeLeft / 60);
+    let s = timeLeft % 60;
+    document.getElementById('quizTimer').textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    if(timeLeft <= 0){
+      clearInterval(timerInterval);
+      finishQuiz();
+    }
+    timeLeft--;
+  }, 1000);
+}
+
+function renderQuestion(){
+  const q = currentQuestions[currentIndex];
+  document.getElementById('progressNum').textContent = `${currentIndex + 1}/${currentQuestions.length}`;
+  document.getElementById('progressFill').style.width = ((currentIndex + 1) / currentQuestions.length * 100) + '%';
+  document.getElementById('qText').textContent = q.q;
+
+  const wrap = document.getElementById('optsWrap');
+  wrap.innerHTML = '';
+  q.options.forEach((opt, idx) => {
+    const div = document.createElement('div');
+    div.className = 'opt';
+    if(userAnswers[currentIndex] === idx) div.classList.add('selected');
+    div.innerHTML = `
+      <div class="opt-letter">${['A','B','C','D'][idx]}</div>
+      <div>${opt}</div>
+    `;
+    div.addEventListener('click', () => {
+      userAnswers[currentIndex] = idx;
+      renderQuestion();
+    });
+    wrap.appendChild(div);
+  });
+
+  document.getElementById('nextQBtn').textContent = currentIndex === currentQuestions.length - 1 ? 'Testni yakunlash' : 'Keyingi savol';
+}
+
+document.getElementById('nextQBtn').addEventListener('click', () => {
+  if(currentIndex < currentQuestions.length - 1){
+    currentIndex++;
+    renderQuestion();
+  } else {
+    clearInterval(timerInterval);
+    finishQuiz();
+  }
+});
+
+document.getElementById('quizBackBtn').addEventListener('click', () => {
+  clearInterval(timerInterval);
+  showScreen('quizlist');
+});
+
+function finishQuiz(){
+  showScreen('result');
+  score = 0;
+  
+  currentQuestions.forEach((q, i) => {
+    let ans = userAnswers[i];
+    if(ans === q.correct){
+      score++;
+    }
+  });
+
+  const total = currentQuestions.length;
+  const percent = Math.round((score / total) * 100);
+  
+  document.getElementById('resultScore').textContent = score;
+  document.getElementById('resultOf').textContent = '/' + total;
+  document.getElementById('statCorrect').textContent = score;
+  document.getElementById('statWrong').textContent = total - score;
+  document.getElementById('statPercent').textContent = percent + '%';
+
+  let detailsHTML = `<h4 style="margin-bottom:10px; color:var(--gold);">Barcha savollar tahlili:</h4>`;
+  currentQuestions.forEach((q, i) => {
+    let userAns = userAnswers[i];
+    let isCorrect = (userAns === q.correct);
+    let userAnsText = userAns !== null ? q.options[userAns] : "Belgilanmagan";
+    let correctAnsText = q.options[q.correct];
+
+    detailsHTML += `<div style="margin-bottom:12px; padding:8px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid ${isCorrect ? 'var(--mint)' : 'var(--coral)'};">
+      <b>${i+1}. ${q.q}</b><br>
+      Sizning javob: <span style="color:${isCorrect ? 'var(--mint)' : 'var(--coral)'};">${userAnsText}</span><br>
+      To'g'ri javob: <span style="color:var(--mint);">${correctAnsText}</span>
+    </div>`;
+  });
+
+  document.getElementById('resultDetails').innerHTML = detailsHTML;
+
+  const logs = JSON.parse(localStorage.getItem('history_logs') || '[]');
+  logs.push({ percent, category: currentCategory, ts: Date.now() });
+  localStorage.setItem('history_logs', JSON.stringify(logs));
+
+  setXP(getXP() + score * 5 + (percent === 100 ? 50 : 0));
+  syncUserToFirebase();
+}
+
+document.getElementById('retryBtn').addEventListener('click', () => {
+  showScreen('quizlist');
+});
+
+function renderVocab(){
+  const list = document.getElementById('vocabList');
+  list.innerHTML = '';
+  HISTORY_VOCAB.forEach(v => {
+    const card = document.createElement('div');
+    card.className = 'quizset-card';
+    card.innerHTML = `<div class="quizset-body"><div class="quizset-title">${v.term}</div><div class="quizset-desc">${v.desc}</div></div>`;
+    list.appendChild(card);
+  });
+}
+
+function renderLeaderboard(){
+  const lb = document.getElementById('lbList');
+  const podium = document.getElementById('podiumBox');
+  lb.innerHTML = '<div style="text-align:center; color:rgba(247,244,236,0.5);">Reyting yuklanmoqda...</div>';
+  podium.style.display = 'none';
+
+  if(!db){ lb.innerHTML = '<div style="text-align:center;">Baza topilmadi</div>'; return; }
+
+  db.ref('history_users').orderByChild('xp').once('value', snapshot => {
+    lb.innerHTML = '';
+    if(!snapshot.exists()){ lb.innerHTML = '<div style="text-align:center;">Hali natijalar yoq</div>'; return; }
+    let users = [];
+    snapshot.forEach(child => users.push(child.val()));
+    users.sort((a,b) => b.xp - a.xp);
+
+    if(users.length >= 1){
+      podium.style.display = 'flex';
+      let p2 = users[1] ? `<div class="podium-step podium-2"><div>2</div><div style="font-size:12px; overflow:hidden; text-overflow:ellipsis;">${users[1].name}</div><div style="font-size:10px;">${users[1].xp} XP</div></div>` : `<div class="podium-step podium-2"></div>`;
+      let p1 = `<div class="podium-step podium-1"><div>1 👑</div><div style="font-size:13px; overflow:hidden; text-overflow:ellipsis;">${users[0].name}</div><div style="font-size:11px;">${users[0].xp} XP</div></div>`;
+      let p3 = users[2] ? `<div class="podium-step podium-3"><div>3</div><div style="font-size:12px; overflow:hidden; text-overflow:ellipsis;">${users[2].name}</div><div style="font-size:10px;">${users[2].xp} XP</div></div>` : `<div class="podium-step podium-3"></div>`;
+      podium.innerHTML = p2 + p1 + p3;
+    }
+
+    users.forEach((u, idx) => {
+      const isMe = u.name === currentUser;
+      const row = document.createElement('div');
+      row.className = 'lb-row' + (isMe ? ' me' : '');
+      let avatarHtml = u.avatar ? `<img src="${u.avatar}" class="lb-avatar">` : `<div class="lb-avatar">${u.name[0]}</div>`;
+      row.innerHTML = `<div class="lb-pos">#${idx+1}</div>${avatarHtml}<div class="lb-name">${u.name}</div><div class="lb-score">${u.xp} XP</div>`;
+      lb.appendChild(row);
+    });
+  });
+}
+
+function renderProfile(){
+  document.getElementById('editNameInput').value = currentUser;
+  document.getElementById('editAvatarInput').value = currentAvatar;
+  
+  let prevImg = document.getElementById('profileImgPreview');
+  if(currentAvatar){
+    prevImg.src = currentAvatar;
+    prevImg.style.display = 'block';
+  } else {
+    prevImg.style.display = 'none';
+  }
+
+  const logs = JSON.parse(localStorage.getItem('history_logs') || '[]');
+  document.getElementById('statTests').textContent = logs.length;
+  const avg = logs.length ? Math.round(logs.reduce((a,b)=>a+b.percent,0)/logs.length) : 0;
+  document.getElementById('statAvg').textContent = avg + '%';
+
+  const bGrid = document.getElementById('profileBadges');
+  bGrid.innerHTML = '';
+  Object.keys(BADGES_INFO).forEach(key => {
+    let b = BADGES_INFO[key];
+    let item = document.createElement('div');
+    item.className = 'badge-item';
+    item.innerHTML = `<img src="${b.img}" class="badge-logo" alt="${b.name}"><div style="font-size:11px; font-weight:600;">${b.name}</div>`;
+    item.addEventListener('click', () => alert(`🎯 Nishon: ${b.name}\n\nQanday olinadi: ${b.desc}`));
+    bGrid.appendChild(item);
+  });
+}
+
+document.getElementById('saveProfileBtn').addEventListener('click', () => {
+  let newName = document.getElementById('editNameInput').value.trim();
+  let newAvatar = document.getElementById('editAvatarInput').value.trim();
+  if(!newName){ showToast("Ismni bo'sh qoldirib bo'lmaydi!"); return; }
+  
+  currentUser = newName;
+  currentAvatar = newAvatar;
+  localStorage.setItem('history_user', currentUser);
+  localStorage.setItem('history_avatar', currentAvatar);
+  syncUserToFirebase();
+  showToast("Profil yangilandi!");
+  renderProfile();
+});
+
+document.getElementById('openTeacherModal').addEventListener('click', () => {
+  showScreen('teacher');
+  document.getElementById('teacherLoginBox').style.display = 'block';
+  document.getElementById('teacherDashboard').style.display = 'none';
+  document.getElementById('teacherPass').value = '';
+});
+
+document.getElementById('teacherLoginBtn').addEventListener('click', () => {
+  if(document.getElementById('teacherPass').value === 'Farrux123@321'){
+    document.getElementById('teacherLoginBox').style.display = 'none';
+    document.getElementById('teacherDashboard').style.display = 'block';
+    loadTeacherStudents();
+  } else {
+    showToast("Parol noto'g'ri!");
+  }
+});
+
+document.getElementById('teacherBackBtn').addEventListener('click', () => showScreen('home'));
+document.getElementById('teacherLogoutBtn').addEventListener('click', () => showScreen('home'));
+
+document.getElementById('uploadWordBtn').addEventListener('click', () => {
+  let cat = document.getElementById('tCategory').value;
+  let fileInput = document.getElementById('wordFileInput');
+  if(fileInput.files.length === 0){
+    showToast("Iltimos, Word faylini tanlang!");
+    return;
+  }
+
+  let file = fileInput.files[0];
+  let reader = new FileReader();
+  reader.onload = function(event) {
+    let arrayBuffer = event.target.result;
+    mammoth.extractRawText({arrayBuffer: arrayBuffer})
+      .then(result => {
+        let text = result.value;
+        let blocks = text.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+        
+        if(db){
+          db.ref('tests/' + cat).remove();
+        }
+
+        let importedCount = 0;
+        blocks.forEach(block => {
+          let lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+          if(lines.length >= 5){
+            let qText = lines[0].replace(/^\d+[\.\)]\s*/, '');
+            let options = [];
+            let correctIndex = 0;
+
+            for(let i = 1; i <= 4; i++){
+              let optLine = lines[i] || "";
+              if(optLine.startsWith('+')){
+                correctIndex = i - 1;
+                optLine = optLine.replace(/^\+\s*/, '');
+              }
+              optLine = optLine.replace(/^[A-D][\.\)]\s*/, '');
+              options.push(optLine);
+            }
+
+            if(db && qText && options.length === 4){
+              db.ref('tests/' + cat).push({
+                q: qText,
+                options: options,
+                correct: correctIndex
+              });
+              importedCount++;
+            }
+          }
+        });
+
+        showToast(`Fayl tahlil qilindi: ${importedCount} ta test yuklandi!`);
+        fileInput.value = '';
+        renderQuizSets();
+      })
+      .catch(err => {
+        console.error(err);
+        showToast("Faylni tahlil qilishda xatolik yuz berdi!");
+      });
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+function loadTeacherStudents(){
+  if(!db) return;
+  db.ref('history_users').once('value', snapshot => {
+    let listDiv = document.getElementById('teacherStudentsList');
+    listDiv.innerHTML = '';
+    if(!snapshot.exists()){ listDiv.innerHTML = "O'quvchilar yo'q"; return; }
+    snapshot.forEach(child => {
+      let u = child.val();
+      let catsText = "";
+      if(u.categories){
+        catsText = Object.keys(u.categories).map(c => {
+          let catObj = u.categories[c];
+          let avgPct = Math.round(catObj.totalPercent / catObj.totalTests);
+          return `• <b>${c}</b>: ${catObj.totalTests} ta test (O'rtacha: ${avgPct}%)`;
+        }).join('<br>');
+      } else {
+        catsText = "Test ishlamagan";
+      }
+
+      let row = document.createElement('div');
+      row.style.cssText = "padding:10px 0; border-bottom:1px solid var(--line); font-size:13px;";
+      row.innerHTML = `<b>${u.name}</b> (Umumiy XP: ${u.xp || 0})<br><span style="color:var(--gold);">${catsText}</span>`;
+      listDiv.appendChild(row);
+    });
+  });
+}
+
+const QUIZ_CATEGORIES = [
+  { cat: 'Attestatsiya', icon: '🏆', title: 'Attestatsiya testi-1' },
+  { cat: 'MS', icon: '🥇', title: 'MS Test' },
+  { cat: 'Olimpiada', icon: '🏅', title: 'Olimpiada' },
+  { cat: 'DTM', icon: '📚', title: 'DTM Testlari' },
+  { cat: 'Majburiy', icon: '⚡', title: 'Majburiy testlar' }
+];
+
+function renderQuizSets(){
+  const list = document.getElementById('quizCategoriesList');
+  list.innerHTML = '';
+  QUIZ_CATEGORIES.QUIZ_CATEGORIES = QUIZ_CATEGORIES; // fallback
+  QUIZ_CATEGORIES.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'quizset-card';
+    card.dataset.cat = c.cat;
+    card.innerHTML = `<div class="quizset-icon">${c.icon}</div><div class="quizset-body"><div class="quizset-title">${c.title}</div><div class="quizset-desc" id="desc-${c.cat}">Tekshirilmoqda...</div></div>`;
+    list.appendChild(card);
+
+    const localCount = getDefaultQuestions(c.cat).length;
+    if(localCount > 0){
+      applyCategoryState(card, c, localCount);
+    } else if(db){
+      db.ref('tests/' + c.cat).once('value', snap => {
+        let count = 0;
+        if(snap.exists()) snap.forEach(() => { count++; });
+        applyCategoryState(card, c, count);
+      }, () => { applyCategoryState(card, c, 0); });
+    } else {
+      applyCategoryState(card, c, 0);
+    }
+  });
+}
+</script>
+</body>
+</html>
