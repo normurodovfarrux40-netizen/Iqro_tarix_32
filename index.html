@@ -97,7 +97,6 @@
     font-family:'IBM Plex Mono', monospace; font-size:11px; width:22px; height:22px; border-radius:50%;
     border:1px solid rgba(247,244,236,0.3); display:flex; align-items:center; justify-content:center; flex-shrink:0;
   }
-  /* Belgilangan variant sariq rangda chiqishi uchun */
   .opt.selected{
     border-color: var(--gold);
     background: rgba(255,210,63,0.15);
@@ -109,10 +108,11 @@
     font-weight: bold;
   }
 
-  .opt.correct{ border-color: var(--mint); background: rgba(61,220,151,0.12); }
-  .opt.wrong{ border-color: var(--coral); background: rgba(255,107,107,0.12); }
-  .opt.correct .opt-letter{ background: var(--mint); color: var(--ink); }
-  .opt.wrong .opt-letter{ background: var(--coral); color: var(--ink); }
+  .quiz-nav-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
 
   .tabbar{ display:flex; gap:4px; background: var(--ink); border-bottom:1px solid var(--line); padding: 0 0 12px; margin-bottom:18px; }
   .tab-item{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:7px 2px; border-radius:12px; background:transparent; color: rgba(247,244,236,0.5); }
@@ -238,8 +238,11 @@
     </div>
     <div class="q-box"><div class="q-text" id="qText"></div></div>
     <div id="optsWrap"></div>
-    <div class="quiz-nav" style="margin-top:15px;">
-      <button class="btn-primary" id="nextQBtn">Keyingi savol</button>
+    
+    <!-- ORQAGA VA KEYINGI TUGMALARI -->
+    <div class="quiz-nav-row">
+      <button class="btn-secondary" id="prevQBtn" style="margin-top:0;">⬅️ Orqaga</button>
+      <button class="btn-primary" id="nextQBtn" style="margin-bottom:0;">Keyingi savol ➡️</button>
     </div>
   </div>
 
@@ -372,14 +375,14 @@ const ATTESTATSIYA_QUESTIONS_1 = [
   { q: "13. Quyidagilardan faqat to'g'ri ma'lumotlar berilgan javobni aniqlang.\n1) Choshnigir - oliy hukmdor kotibi\n2) Xorazmshohlar davlatida harbiy devon harbiy masalalarni ko'rish Devoni Jayshga yuklatilgan\n3) Xorazmshohlarda harbiy devon boshlig'i albatta musulmon bo'lishi shart edi\n4) Davatdor - oliy hukmdorga beriladigan ovqat, ichimliklarni tatib ko'ruvchi\n5) Xorazmshohlarda Vazir mansabi rasmiy tantana, xalqaro munosabatlar, tobe mamlakatlar bilan muzokaralarda oliy hukmdor nomidan ish yuritgan", options: ["1, 3, 5", "2, 3, 5", "2, 3, 4", "2, 4, 5"], correct: 1 },
   { q: "14. Mustaqil O'zbekiston Respublikasi tarixidagi quyidagi voqealarni xronologik tartibda joylashtiring.\n1) Davlat test markazi tuzildi\n2) Janubiy Koreyaning Inha universiteti filiali ochildi\n3) O'zbekistonda \"Sog'lom ona va bola yili\"\n4) Bolali oilalarga ijtimoiy yordam berila boshlandi\n5) O'zbekistonda yangi tahrirda \"Soliq kodeksi\" qabul qilindi", options: ["1, 4, 5, 2, 3", "1, 4, 5, 3, 2", "5, 1, 2, 3, 4", "1, 4, 3, 2, 5"], correct: 0 },
   { q: "15. Quyidagi olimlarni amalga oshirgan kashfiyotlari bilan mos ravishda berilgan javobni aniqlang.\n1) M.G.Kucherov  2) P.Griss  3) V.Grinyar  4) S.Arrenius\na) Gidratlanish reaksiyasi  b) Diazotlash reaksiyasi  c) Xilma-xil organik moddalarni sintez qilish  d) Elektrolitik dissotsiatsiya nazariyasi", options: ["1-a, 2-b, 3-c, 4-d", "1-b, 2-a, 3-c, 4-d", "1-a, 2-b, 3-d, 4-c", "1-d, 2-b, 3-c, 4-a"], correct: 0 },
-  { q: "16. Xaritada 35-raqam bilan belgilangan hudud (davlat) tarixi bilan bog'liq to'g'ri ma'lumot berilgan javobni toping.", options: ["Ichki holatning og'irligiga qaramasdan 1990-yillari iqtisodiy o'sishni jadallashtirishga erishildi", "1990-yillardagi Osiyo inqirozi juda qattiq ta'sir ko'rsatdi", "1991-yili konstitutsiya qabul qilindi", "hokimiyatni Oliy milliy kengashga berish to'g'risida 1991-yil oktabrda yakunlangan Parij konferensiyasida qaror qilindi"], correct: 0 },
+  { q: "16. 🗺 [XARITALI SAVOL]\nXaritada 35-raqam bilan belgilangan hudud (davlat) tarixi bilan bog'liq to'g'ri ma'lumot berilgan javobni toping.", options: ["Ichki holatning og'irligiga qaramasdan 1990-yillari iqtisodiy o'sishni jadallashtirishga erishildi", "1990-yillardagi Osiyo inqirozi juda qattiq ta'sir ko'rsatdi", "1991-yili konstitutsiya qabul qilindi", "hokimiyatni Oliy milliy kengashga berish to'g'risida 1991-yil oktabrda yakunlangan Parij konferensiyasida qaror qilindi"], correct: 0 },
   { q: "17. To'g'ri ma'lumot berilgan javobni toping.", options: ["1991-yil mayda O'zbekistonda zamonaviy shaklda, yangi tipdagi soliq tizimi vujudga keldi", "2016-yilda 2-sentabrdagi qarorga ko'ra O'zbekistonda 5-sentabrdan yuridik va jismoniy shaxslar xorijiy valyutani hech qanday cheklovlarsiz almashtirishni boshladi", "2006-yil \"Ijtimoiy himoya yili\"", "2017-yili 30-sentabrda Maktabgacha ta'lim tizimini boshqarishni takomillashtirish to'g'risida farmon imzolandi"], correct: 3 },
   { q: "18. Quyidagi atamalarning izohlari mos ravishda berilgan javobni toping.\n1) Delimitatsiya  2) Potensial  3) Artel\na) Davlat chegaralarini tuzilgan shartnomaga muvofiq tavsiflash va xaritalashtirish asosida belgilash\nb) mafkuraviy rejim shakli bo'lib, totalitar jamiyatda aholining keng miqyosda ommaviy ravishda mafkuraviy qayta tarbiyalash vositasi\nc) qaysidir soha, jabhada mavjud barcha imkoniyatlar, vositalar yig'indisi, keng ma'noda zaxira vositalari\nd) kasb-hunar egalarining birgalashib, jamoa bo'lib ishlash uchun tuzilgan uyushma shakllaridan biri", options: ["1-b, 2-d, 3-c", "1-a, 2-d, 3-b", "1-a, 2-b, 3-d", "1-a, 2-c, 3-d"], correct: 3 },
   { q: "19. Xiva xonligi va ular davrida amalga oshirilgan ishlar mos bo'lgan javobni aniqlang.\n1) Olloqulixon  2) Muhammad Amin  3) Eltuzarxon\na) Xonlik tarixiga Qo'ng'irotlar sulolasi rasman o'rnatilgan sana sifatida kirdi\nb) Jon saqlash uchun o'zga yurtlarga qochib ketgan fuqarolar yana qaytib kela boshladi\nc) Bojxona va soliq islohoti o'tkazildi\nd) Xonlikda markazlashgan siyosat yuritish uchun harakat qildi\ne) Mamlakat iqtisodini ko'tarish maqsadida yangi kanallar qazdirib, sug'oriladigan yer maydonlari kengaytirildi\nf) Koshinkorlik san'ati yuksak cho'qqiga chiqdi\ng) Ocharchilik va vabo tarqaldi", options: ["1-e, f; 2-b, g; 3-a, d", "1-b, d; 2-a, f, g; 3-b, d", "1-c, e; 2-b, d; 3-a, f, g", "1-e, f; 2-a, c; 3-b, g"], correct: 0 },
   { q: "20. Quyidagi tarixiy voqealarni xronologik ketma-ketlikda joylashtiring.\n1) Muhandis V.I.Lopushinskiy yuk lokomotivi ishlab chiqardi\n2) Xalqaro sotsialistik ishchilar va kasaba uyushmalari kongressi Londonda bo'ldi\n3) Buyuk Britaniya shaharlarida ishchilarning bir qismi saylov huquqiga ega bo'ldi\n4) Germaniya shaharlarida aholining 2/3 qismi shaharlarda istiqomat qilardi\n5) AQSH hukumati o'z qo'shinlarini Meksikadan olib chiqib ketdi", options: ["3, 1, 4, 5, 2", "3, 1, 2, 4, 5", "3, 1, 2, 5, 4", "5, 2, 3, 4, 1"], correct: 1 },
-  { q: "21. Quyidagi grafikda qaysi raqam ostida davlat va rahbarlari bir-biriga muvofiq keladi?\n(Iordaniya - Abdulloh I ibn Husayn, Suriya - Bashar Asad, Isroil - Isxak Rabin, Falastin - Mahmud Abbos)", options: ["1, 3, 6, 7", "2, 4, 6, 7", "2, 3, 4, 5", "1, 3, 5, 7"], correct: 3 },
+  { q: "21. 📊 [GRAFIKLI SAVOL]\nQuyidagi grafikda qaysi raqam ostida davlat va rahbarlari bir-biriga muvofiq keladi?\n(Iordaniya - Abdulloh I ibn Husayn, Suriya - Bashar Asad, Isroil - Isxak Rabin, Falastin - Mahmud Abbos)", options: ["1, 3, 6, 7", "2, 4, 6, 7", "2, 3, 4, 5", "1, 3, 5, 7"], correct: 3 },
   { q: "22. Qaysi qatorlarda davlat, hukmdor va hukmronlik yillari to'g'ri berilgan.\n1. Xorazmshohlar - Takash - 1172-1201\n2. G'aznaviylar - Sobuqtegin - 977-997\n3. Ray - Malika Xotun - 1000-1029\n4. Sosoniy - Xurmuzd VI - 579-590\n5. Safforiylar - Amir ibn Lays - 873-879\n6. Xarsha - Xarsha - 606-647", options: ["3, 4, 6", "1, 3, 5", "2, 3, 6", "2, 4, 6"], correct: 2 },
-  { q: "23. Quyidagi jadvalning qaysi qatorlaridagi ma'lumotlar bir-biriga mos ravishda to'g'ri berilgan?\n1. Liberiya - Etnik asosda boshlangan fuqarolar urushi ko'plab qurbonlar va 1 mln aholining qo'shni davlatlarga ommaviy qochishiga olib keldi\n2. Kongo - Natoning hisobotiga ko'ra dunyoning eng qashshoq mamlakati edi\n3. Syerra-Leone - Harbiy to'ntarishlar va qurolli mojarolar fuqarolar urushiga olib keldi. Faqat BMT aralashuvi keskinlikni kuchaytirdi\n4. Ruanda va Burundi - Tutsi va Xutu xalqlari o'rtasidagi kurash keskinlashib, genotsidga olib keldi\n5. Efiopiya - Mengistu Xayle Mariam hukumati 1990-yilda ag'darildi\n6. Liviya - Mamlakatda 2016-yil fuqarolar urushi boshlandi", options: ["1, 4, 5", "2, 4, 6", "1, 4, 6", "2, 3, 6"], correct: 2 },
+  { q: "23. Quyidagi jadvalning qaysi qatorlaridagi ma'lumotlar bir-biriga mos ravishda to'g'ri berilgan?\n1. Liberiya - Etnik asosda boshlangan fuqarolar urushi...\n2. Kongo - Qashshoq mamlakat...\n3. Syerra-Leone - Harbiy to'ntarishlar...\n4. Ruanda va Burundi - Genotsid...\n5. Efiopiya - Mengistu Xayle Mariam...\n6. Liviya - 2016-yil fuqarolar urushi...", options: ["1, 4, 5", "2, 4, 6", "1, 4, 6", "2, 3, 6"], correct: 2 },
   { q: "24. Qadimgi Yunon-Baqtriya davlatidagi hukmdorlarning qilgan ishlari bilan to'g'ri muvofiqlashtiring.\n1) Yevtidem  2) Diodot  3) Demetriy\na) Hindistonning bir qismi qo'shib olingan  b) Sezilarli iz qoldirmagan  c) Mingta shahar hukmdori deb e'lon qilingan", options: ["1-c, 2-a, 3-b", "1-b, 2-c, 3-a", "1-a, 2-c, 3-b", "1-b, 2-a, 3-c"], correct: 1 },
   { q: "25. Quyidagi tarixiy shaxslarni ular chizgan asarlari bilan muvofiqlashtiring.\n1) Dyu Monsel Teodor  2) Antuan Vatto  3) V.S.Kaydalov  4) O'ral Tansiqboev\na) \"Abro'y qo'zg'oloni\"  b) \"Qiyin taklif\"  c) \"Urush yo'llarida\"  d) \"Arslonlar darvozasi\"", options: ["1-c, 2-a, 3-b, 4-d", "1-d, 2-a, 3-c, 4-b", "1-d, 2-b, 3-a, 4-c", "1-a, 2-d, 3-b, 4-c"], correct: 2 },
   { q: "26. O'zbekiston Kompartiyasi Markaziy Komitetining birinchi sekretarlari va ularga tegishli bo'lgan mulohazalar bilan muvofiqlashtiring.\n1) Amin Niyoziy  2) Nuriddin Muhiddinov  3) Sobir Kamolov\na) 15 oy davomida respublika partiya tashkilotini boshqargan  b) Paxta xarid narxini oshirishni Markaz oldiga qo'yib buni uddaladi  c) Marg'ilonda tug'ilgan  d) Mirzacho'ldagi \"4-Boyovut\" sovxoziga direktor bo'ldi", options: ["1-c, 2-b, 3-d", "1-d, 2-a, 3-c", "1-b, 2-d, 3-a", "1-c, 2-b, 3-a"], correct: 3 },
@@ -723,8 +726,16 @@ function renderQuestion(){
     wrap.appendChild(div);
   });
 
-  document.getElementById('nextQBtn').textContent = currentIndex === currentQuestions.length - 1 ? 'Testni yakunlash' : 'Keyingi savol';
+  document.getElementById('prevQBtn').style.display = currentIndex === 0 ? 'none' : 'block';
+  document.getElementById('nextQBtn').textContent = currentIndex === currentQuestions.length - 1 ? 'Testni yakunlash' : 'Keyingi savol ➡️';
 }
+
+document.getElementById('prevQBtn').addEventListener('click', () => {
+  if(currentIndex > 0){
+    currentIndex--;
+    renderQuestion();
+  }
+});
 
 document.getElementById('nextQBtn').addEventListener('click', () => {
   if(currentIndex < currentQuestions.length - 1){
