@@ -177,7 +177,7 @@
     <div id="quizCategoriesList"></div>
   </div>
 
-  <!-- SUB-TESTLAR RO'YXATI (MASALAN ATTESTATSIYA ICHIDAGILAR) -->
+  <!-- SUB-TESTLAR RO'YXATI -->
   <div class="screen" id="screen-subsets">
     <div class="eyebrow">To'plamlar</div>
     <h1 id="subCategoryTitle">Attestatsiya testlari</h1>
@@ -279,7 +279,7 @@
         <option value="Majburiy">Majburiy</option>
       </select>
       
-      <input type="text" id="tSubName" placeholder="Test nomi (Masalan: Attestatsiya testi-1)" style="margin-top:10px;">
+      <input type="text" id="tSubName" placeholder="Test nomi (Masalan: Attestatsiya testi-2)" style="margin-top:10px;">
       <p class="sub" style="font-size:13px; margin-bottom:8px;">(.docx formatdagi Word faylni tanlang)</p>
       <input type="file" id="wordFileInput" accept=".docx" style="padding:10px; background:var(--ink-soft); border-radius:12px; border:1px solid var(--line); margin-bottom:14px; width:100%; color:var(--paper);">
       <button class="btn-primary" id="uploadWordBtn">Word faylni yuklash va tahlil qilish</button>
@@ -528,7 +528,6 @@ function renderQuizSets(){
 
     if(c.cat === 'Attestatsiya'){
       let count = ATTESTATSIYA_QUESTIONS_1.length;
-      let timeMin = count * 2;
       const desc = card.querySelector('.quizset-desc');
       if(desc){
         desc.textContent = `1 ta to'plam mavjud (${count} ta savol)`;
@@ -565,11 +564,10 @@ function renderSubTests(catName){
     db.ref('tests/' + catName).once('value', snap => {
       if(snap.exists()){
         snap.forEach(child => {
-          // Agar o'qituvchi alohida sub-test yuklagan bo'lsa
           let subName = child.key;
           let subData = child.val();
           if(Array.isArray(subData)){
-            subTests.push({ name: subName, count: subData.length, data: subData });
+            subTests.push({ name: subName, count: subData.length });
           }
         });
       }
@@ -624,7 +622,13 @@ function applyCategoryState(card, c, count){
   }
 }
 
-document.getElementById('backToCatBtn').addEventListener('click', () => showScreen('quizlist'));
+document.getElementById('backToCatBtn').addEventListener('click', () => {
+  if(currentCategory === 'Attestatsiya'){
+    renderSubTests('Attestatsiya');
+  } else {
+    showScreen('quizlist');
+  }
+});
 
 document.getElementById('modeTimedBtn').addEventListener('click', () => {
   isTimedMode = true;
@@ -738,7 +742,11 @@ document.getElementById('nextQBtn').addEventListener('click', () => {
 
 document.getElementById('quizBackBtn').addEventListener('click', () => {
   clearInterval(timerInterval);
-  showScreen('subsets');
+  if(currentCategory === 'Attestatsiya'){
+    renderSubTests('Attestatsiya');
+  } else {
+    showScreen('quizlist');
+  }
 });
 
 function finishQuiz(){
